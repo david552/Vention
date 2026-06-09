@@ -15,6 +15,7 @@ builder.Services.AddOptions<CryptoSettingsOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddApplicationServices();
 
 
 var app = builder.Build();
