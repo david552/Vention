@@ -1,0 +1,6 @@
+@Vention.API_HostAddress = http://localhost:5258
+
+GET {{Vention.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
