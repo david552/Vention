@@ -1,13 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
-using Vention.Application;
-using Vention.Application.User.Services;
 
 
-namespace Vention.Week1.Application.User.Services
+namespace Vention.Application.User.Services
 {
     public class UserService : IUserService
     {
