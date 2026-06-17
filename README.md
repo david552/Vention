@@ -1,5 +1,10 @@
-1) Docker Build - docker build -f Vention.API/Dockerfile -t vention-api .
+Task 2.4
 
-2) Docker Run - docker run --rm -d -p 5000:8080 --name my-vention-api -e "ASPNETCORE_ENVIRONMENT=Development" -e "CryptoSettings__PasswordPepper=12345" vention-api
+1)Before running the application, you need to create a `.env` file in the root directory (next to `Vention.sln`) to store local secrets
+Create a file named `.env` and add the following content: PASSWORD_PEPPER=12345
 
-3) Docker Stop - docker stop my-vention-api
+2)Build and Start the Application - docker compose up -d --build
+
+3) Verify Environment Variables - docker exec my-vention-api-compose printenv
+
+4) Stop the Application - docker compose down
