@@ -11,10 +11,13 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
       - ConnectionStrings__DefaultConnection=Host=vention-postgres;Database=VentionDb;Username=postgres;Password=your_secret_password
+      - ConnectionStrings__Redis=vention-redis:6379
     networks:
       - vention-network
     depends_on:
       vention-postgres:
+        condition: service_healthy
+      vention-redis:
         condition: service_healthy
 
   vention-postgres:
@@ -36,10 +39,26 @@ services:
       timeout: 5s
       retries: 5
 
+  vention-redis:
+    container_name: vention-redis
+    image: redis:alpine 
+    ports:
+      - "6379:6379" 
+    volumes:
+      - redis-data:/data 
+    networks:
+      - vention-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"] 
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres-data:
+  redis-data:
 
 networks:
   vention-network:
     driver: bridge
+  
