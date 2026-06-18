@@ -12,12 +12,17 @@ services:
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
       - ConnectionStrings__DefaultConnection=Host=vention-postgres;Database=VentionDb;Username=postgres;Password=your_secret_password
       - ConnectionStrings__Redis=vention-redis:6379
+      - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Username=guest
+      - RabbitMqSettings__Password=guest
     networks:
       - vention-network
     depends_on:
       vention-postgres:
         condition: service_healthy
       vention-redis:
+        condition: service_healthy
+      vention-rabbitmq:
         condition: service_healthy
 
   vention-postgres:
@@ -54,9 +59,29 @@ services:
       timeout: 5s
       retries: 5
 
+  vention-rabbitmq:
+    container_name: vention-rabbitmq
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"  
+      - "15672:15672" 
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - vention-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres-data:
   redis-data:
+  rabbitmq-data:
 
 networks:
   vention-network:
