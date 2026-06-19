@@ -10,11 +10,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
-      - ConnectionStrings__DefaultConnection=Host=vention-postgres;Database=VentionDb;Username=postgres;Password=your_secret_password
+      - ConnectionStrings__DefaultConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
-      - RabbitMqSettings__Username=guest
-      - RabbitMqSettings__Password=guest
+      - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
+      - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
     networks:
       - vention-network
     depends_on:
@@ -29,8 +29,8 @@ services:
     container_name: vention-postgres
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=your_secret_password
+      - POSTGRES_USER=${POSTGRES_SECRET_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_SECRET_PASSWORD}
       - POSTGRES_DB=VentionDb
     ports:
       - "5432:5432" 
@@ -39,7 +39,7 @@ services:
     networks:
       - vention-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SECRET_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -66,8 +66,8 @@ services:
       - "5672:5672"  
       - "15672:15672" 
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=${RABBIT_SECRET_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_SECRET_PASS}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     networks:
