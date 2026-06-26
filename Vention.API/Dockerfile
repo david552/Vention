@@ -6,11 +6,14 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src  
 
+COPY ["Vention.sln", "./"]
 COPY ["Vention.Domain/Vention.Domain.csproj", "Vention.Domain/"]
 COPY ["Vention.Application/Vention.Application.csproj", "Vention.Application/"]
 COPY ["Vention.API/Vention.API.csproj", "Vention.API/"]
+COPY ["Vention.Infrastructure/Vention.Infrastructure.csproj", "Vention.Infrastructure/"]
+COPY ["Vention.Application.Tests/Vention.Application.Tests.csproj", "Vention.Application.Tests/"]
 
-RUN dotnet restore "Vention.API/Vention.API.csproj"
+RUN dotnet restore "Vention.sln"
 
 COPY . .
 

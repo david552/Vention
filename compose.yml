@@ -10,7 +10,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
-      - ConnectionStrings__DefaultConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
