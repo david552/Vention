@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using Vention.Application;
+using Vention.Infrastructure;
+using Vention.Infrastructure.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +19,15 @@ builder.Services.AddOptions<CryptoSettingsOptions>()
     .ValidateOnStart();
 
 builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructure(builder.Configuration);
+
 
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<VentionDbContext>();
+Console.WriteLine(await db.Database.CanConnectAsync() ? "Connected" : "Failed");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
