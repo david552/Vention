@@ -1,7 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Vention.Infrastructure.Database;
+using Vention.Application.Abstractions;
+using Vention.Domain.Chats;
+using Vention.Domain.Membership;
+using Vention.Domain.Organizations;
+using Vention.Domain.Users;
+using Vention.Infrastructure.Persistence;
+using Vention.Infrastructure.Persistence.Repositories;
 
 namespace Vention.Infrastructure
 {
@@ -11,6 +17,16 @@ namespace Vention.Infrastructure
         {
             services.AddDbContext<VentionDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+            services.AddScoped<IMembershipRepository, MembershipRepository>();
+            services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+            services.AddScoped<IChatSessionMemberRepository, ChatSessionMemberRepository>();
+            services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+            services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
             return services;
         }
