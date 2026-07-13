@@ -29,6 +29,11 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .HasFilter("\"is_deleted\" = false"); 
             });
 
+            builder.Property<long>("Sequence")
+                .HasColumnName("sequence")
+                .ValueGeneratedOnAdd()
+                .UseIdentityAlwaysColumn();
+
             builder.Property(u => u.IsDeleted)
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false)

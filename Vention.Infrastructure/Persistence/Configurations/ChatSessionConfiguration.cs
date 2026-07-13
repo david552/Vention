@@ -34,6 +34,20 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .HasConversion(id => id.Value, value => new UserId(value))
                 .IsRequired();
 
+            builder.Property(cs => cs.DirectChatKey)
+               .HasColumnName("direct_chat_key")
+               .HasMaxLength(100)
+               .HasConversion(
+                  key => key == null ? null : key.Value,
+                  value => value == null ? null : 
+                  new DirectChatKey(value) 
+               );
+
+            builder.Property<long>("Sequence")
+               .HasColumnName("sequence")
+               .ValueGeneratedOnAdd()
+               .UseIdentityAlwaysColumn();
+
             builder.Property(cs => cs.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamptz")
@@ -53,6 +67,14 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(cs => cs.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.HasIndex("OrganizationId", "UpdatedAt", "Sequence")
+                .IsDescending(false, true, true);
+
+            builder.HasIndex(cs => new { cs.OrganizationId, cs.DirectChatKey })
+                .IsUnique()
+                .HasFilter("\"direct_chat_key\" IS NOT NULL");
         }
     }
 }

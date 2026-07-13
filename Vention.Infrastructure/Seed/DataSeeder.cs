@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vention.Domain.Chats;
 using Vention.Domain.Membership;
+using Vention.Domain.Messages;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
 using Vention.Infrastructure.Persistence;
@@ -41,7 +42,7 @@ namespace Vention.Infrastructure.Seed
             context.Set<Membership>().AddRange(adminMembership, regularMembership);
 
             //char session
-            var generalChat = ChatSession.Create("Chat", ventionOrg.Id, adminUser.Id);
+            var generalChat = ChatSession.CreateDirectChat(ventionOrg.Id, adminUser.Id, regularUser.Id);
             context.Set<ChatSession>().Add(generalChat);
 
             var adminMember = ChatSessionMember.Create(generalChat.Id, adminUser.Id);

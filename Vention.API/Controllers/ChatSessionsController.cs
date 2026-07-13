@@ -8,6 +8,7 @@ using Vention.Application.Chats.Queries.GetChatSessionById;
 using Vention.Application.Chats.Queries.GetChatSessionMembers;
 using Vention.Application.Chats.Queries.GetChatSessionsByOrganization;
 using Vention.Application.Chats.Queries.GetSessionsForUser;
+using Vention.Application.Common;
 using Vention.Application.Messaging;
 
 namespace Vention.API.Controllers
@@ -46,13 +47,23 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet("by-user/{userId:guid}")]
-        public async Task<ActionResult<IReadOnlyList<ChatSessionResponse>>> GetByUser(
-            Guid userId,
-            [FromQuery] Guid organizationId,
-            CancellationToken ct)
+        public async Task<ActionResult<CursorPage<ChatSessionResponse>>> GetByUser(
+           Guid userId,
+           [FromQuery] Guid organizationId,
+           [FromQuery] string? cursor,
+           [FromQuery] int pageSize = 50,
+           CancellationToken ct = default)
         {
-            var result = await _dispatcher.Send(new GetSessionsForUserQuery(userId, organizationId), ct);
-            return Ok(result);
+            try
+            {
+                var result = await _dispatcher.Send(
+                    new GetSessionsForUserQuery(userId, organizationId, cursor, pageSize), ct);
+                return Ok(result);
+            }
+            catch (ArgumentException ex) when (ex.ParamName == "cursor")
+            {
+                return BadRequest(new { error = "Invalid cursor." });
+            }
         }
 
         [HttpGet("by-organization/{organizationId:guid}")]

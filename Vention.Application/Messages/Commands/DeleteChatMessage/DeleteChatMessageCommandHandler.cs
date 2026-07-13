@@ -1,9 +1,9 @@
 using Vention.Application.Abstractions;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
-using Vention.Domain.Chats;
+using Vention.Domain.Messages;
 
-namespace Vention.Application.Chats.Commands.DeleteChatMessage
+namespace Vention.Application.Messages.Commands.DeleteChatMessage
 {
     public sealed class DeleteChatMessageCommandHandler : ICommandHandler<DeleteChatMessageCommand>
     {

@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using Vention.Application.Chats.Commands.DeleteChatMessage;
-using Vention.Application.Chats.Commands.SendChatMessage;
-using Vention.Application.Chats.Contracts;
-using Vention.Application.Chats.Queries.GetChatMessageById;
-using Vention.Application.Chats.Queries.GetChatMessagesBySession;
+using Vention.Application.Common;
+using Vention.Application.Messages.Commands.DeleteChatMessage;
+using Vention.Application.Messages.Commands.SendChatMessage;
+using Vention.Application.Messages.Contracts;
+using Vention.Application.Messages.Queries.GetChatMessageById;
+using Vention.Application.Messages.Queries.GetChatMessagesBySession;
 using Vention.Application.Messaging;
 
 namespace Vention.API.Controllers
@@ -27,11 +28,16 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ChatMessageResponse>>> GetBySession(
+        public async Task<ActionResult<CursorPage<ChatMessageResponse>>> GetBySession(
             Guid sessionId,
-            CancellationToken ct)
+            [FromQuery] string? cursor = null,
+            [FromQuery] int pageSize = 50,
+            CancellationToken ct = default)
         {
-            var result = await _dispatcher.Send(new GetChatMessagesBySessionQuery(sessionId), ct);
+
+            var result = await _dispatcher.Send(
+                new GetChatMessagesBySessionQuery(sessionId, cursor, pageSize), ct);
+
             return Ok(result);
         }
 

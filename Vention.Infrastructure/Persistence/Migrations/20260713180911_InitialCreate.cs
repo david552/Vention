@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -38,7 +39,9 @@ namespace Vention.Infrastructure.Persistence.Migrations
                     created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
                     updated_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    deleted_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: true)
+                    deleted_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: true),
+                    sequence = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn)
                 },
                 constraints: table =>
                 {
@@ -53,8 +56,11 @@ namespace Vention.Infrastructure.Persistence.Migrations
                     title = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     organization_id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_by_user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    direct_chat_key = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false)
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
+                    sequence = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn)
                 },
                 constraints: table =>
                 {
@@ -109,7 +115,9 @@ namespace Vention.Infrastructure.Persistence.Migrations
                     chat_session_id = table.Column<Guid>(type: "uuid", nullable: false),
                     sender_id = table.Column<Guid>(type: "uuid", nullable: false),
                     content = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false)
+                    created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
+                    sequence = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn)
                 },
                 constraints: table =>
                 {
@@ -155,14 +163,19 @@ namespace Vention.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_chat_messages_chat_session_id",
+                name: "IX_chat_messages_chat_session_id_created_at_id",
                 table: "chat_messages",
-                column: "chat_session_id");
+                columns: new[] { "chat_session_id", "created_at", "id" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_chat_messages_sender_id",
                 table: "chat_messages",
                 column: "sender_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_chat_messages_session_created_sequence",
+                table: "chat_messages",
+                columns: new[] { "chat_session_id", "created_at", "sequence" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_chat_session_members_chat_session_id_user_id",
@@ -181,9 +194,17 @@ namespace Vention.Infrastructure.Persistence.Migrations
                 column: "created_by_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_chat_sessions_organization_id",
+                name: "IX_chat_sessions_organization_id_direct_chat_key",
                 table: "chat_sessions",
-                column: "organization_id");
+                columns: new[] { "organization_id", "direct_chat_key" },
+                unique: true,
+                filter: "\"direct_chat_key\" IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chat_sessions_organization_id_updated_at_sequence",
+                table: "chat_sessions",
+                columns: new[] { "organization_id", "updated_at", "sequence" },
+                descending: new[] { false, true, true });
 
             migrationBuilder.CreateIndex(
                 name: "IX_memberships_organization_id",

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Vention.Domain.Chats;
 using Vention.Domain.Membership;
+using Vention.Domain.Messages;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
 

@@ -1,4 +1,4 @@
-using Mapster;
+﻿using Mapster;
 using Vention.Application.Abstractions;
 using Vention.Application.Chats.Contracts;
 using Vention.Application.Exceptions;
@@ -7,6 +7,8 @@ using Vention.Domain.Chats;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
+using System.Data;
+
 
 namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
 {
@@ -64,15 +66,47 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
             if (existing is not null)
                 return existing.Adapt<ChatSessionResponse>();
 
-            var session = ChatSession.Create(participant.Name, organizationId, initiatorId);
-            _sessionRepository.Add(session);
 
+            
+            //  SAMPLE — explicit transaction + isolation level
+            // ------------------------------------------------------------
+            // For most handlers in this project stage this is NOT required:
+            // - one SaveChangesAsync already runs in an implicit EF transaction
+            // - unique indexes handle duplicate/concurrency for direct chats
+            //
+            // This block is kept as a deliberate sample of:
+            // - Transaction management (Begin / SaveChanges / Commit / Rollback)
+            // - Isolation levels (explicit ReadCommitted; can switch later)
+            
+
+            var session = ChatSession.CreateDirectChat(organizationId, initiatorId, participantId);
+
+            _sessionRepository.Add(session);
             _memberRepository.Add(ChatSessionMember.Create(session.Id, initiatorId));
             _memberRepository.Add(ChatSessionMember.Create(session.Id, participantId));
 
-            await _unitOfWork.SaveChangesAsync(ct);
+            // 4.3: PostgreSQL default is ReadCommitted; we set it explicitly for clarity.
+            // Use RepeatableRead/Serializable only when a use case needs stronger guarantees
+            // than unique constraints + retry (not required for current chat flows).
+            await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
 
-            return session.Adapt<ChatSessionResponse>();
+            try
+            {
+                // all pending inserts commit together in this explicit transaction
+
+                await _unitOfWork.SaveChangesAsync(ct);
+                return session.Adapt<ChatSessionResponse>();
+            }
+            catch (Exception ex)
+            {
+                // Unique index lost the race → return the row the other request created
+                var raced = await _memberRepository.FindDirectSessionAsync(
+                    initiatorId, participantId, organizationId, ct)
+                    ?? throw new InvalidOperationException(
+                       "Failed to create or find direct chat session after a concurrency conflict.");
+
+                return raced.Adapt<ChatSessionResponse>();
+            }
         }
     }
 }

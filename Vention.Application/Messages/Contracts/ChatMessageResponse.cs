@@ -1,4 +1,4 @@
-namespace Vention.Application.Chats.Contracts
+namespace Vention.Application.Messages.Contracts
 {
     public sealed record ChatMessageResponse(
         Guid Id,

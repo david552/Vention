@@ -1,10 +1,10 @@
 using Mapster;
-using Vention.Application.Chats.Contracts;
 using Vention.Application.Exceptions;
+using Vention.Application.Messages.Contracts;
 using Vention.Application.Messaging;
-using Vention.Domain.Chats;
+using Vention.Domain.Messages;
 
-namespace Vention.Application.Chats.Queries.GetChatMessageById
+namespace Vention.Application.Messages.Queries.GetChatMessageById
 {
     public sealed class GetChatMessageByIdQueryHandler : IQueryHandler<GetChatMessageByIdQuery, ChatMessageResponse>
     {

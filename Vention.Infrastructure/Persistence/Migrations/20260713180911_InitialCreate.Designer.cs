@@ -12,7 +12,7 @@ using Vention.Infrastructure.Persistence;
 namespace Vention.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(VentionDbContext))]
-    [Migration("20260707144449_InitialCreate")]
+    [Migration("20260713180911_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,38 +24,6 @@ namespace Vention.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Vention.Domain.Chats.ChatMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ChatSessionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("chat_session_id");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("sender_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatSessionId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("chat_messages", (string)null);
-                });
 
             modelBuilder.Entity("Vention.Domain.Chats.ChatSession", b =>
                 {
@@ -71,9 +39,21 @@ namespace Vention.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_user_id");
 
+                    b.Property<string>("DirectChatKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("direct_chat_key");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid")
                         .HasColumnName("organization_id");
+
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sequence");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Sequence"));
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -89,7 +69,12 @@ namespace Vention.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("OrganizationId");
+                    b.HasIndex("OrganizationId", "DirectChatKey")
+                        .IsUnique()
+                        .HasFilter("\"direct_chat_key\" IS NOT NULL");
+
+                    b.HasIndex("OrganizationId", "UpdatedAt", "Sequence")
+                        .IsDescending(false, true, true);
 
                     b.ToTable("chat_sessions", (string)null);
                 });
@@ -160,6 +145,48 @@ namespace Vention.Infrastructure.Persistence.Migrations
                     b.ToTable("memberships", (string)null);
                 });
 
+            modelBuilder.Entity("Vention.Domain.Messages.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ChatSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chat_session_id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sender_id");
+
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sequence");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Sequence"));
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ChatSessionId", "CreatedAt", "Id");
+
+                    b.HasIndex("ChatSessionId", "CreatedAt", "Sequence")
+                        .HasDatabaseName("ix_chat_messages_session_created_sequence");
+
+                    b.ToTable("chat_messages", (string)null);
+                });
+
             modelBuilder.Entity("Vention.Domain.Organizations.Organization", b =>
                 {
                     b.Property<Guid>("Id")
@@ -226,6 +253,13 @@ namespace Vention.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sequence");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Sequence"));
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("updated_at");
@@ -233,21 +267,6 @@ namespace Vention.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("Vention.Domain.Chats.ChatMessage", b =>
-                {
-                    b.HasOne("Vention.Domain.Chats.ChatSession", null)
-                        .WithMany()
-                        .HasForeignKey("ChatSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Vention.Domain.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Vention.Domain.Chats.ChatSession", b =>
@@ -292,6 +311,21 @@ namespace Vention.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Vention.Domain.Messages.ChatMessage", b =>
+                {
+                    b.HasOne("Vention.Domain.Chats.ChatSession", null)
+                        .WithMany()
+                        .HasForeignKey("ChatSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Vention.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
