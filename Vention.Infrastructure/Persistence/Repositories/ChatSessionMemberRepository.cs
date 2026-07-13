@@ -1,0 +1,51 @@
+using Microsoft.EntityFrameworkCore;
+using Vention.Domain.Chats;
+using Vention.Domain.Organizations;
+using Vention.Domain.Users;
+
+namespace Vention.Infrastructure.Persistence.Repositories
+{
+    public sealed class ChatSessionMemberRepository : IChatSessionMemberRepository
+    {
+        private readonly VentionDbContext _context;
+        public ChatSessionMemberRepository(VentionDbContext context) => _context = context;
+
+        public async Task<IReadOnlyList<ChatSessionMember>> GetBySessionIdAsync(ChatSessionId sessionId, CancellationToken ct)
+            => await _context.ChatSessionMembers
+                .AsNoTracking()
+                .Where(m => m.ChatSessionId == sessionId)
+                .ToListAsync(ct);
+
+        public async Task<IReadOnlyList<ChatSession>> GetSessionsForUserAsync(
+            UserId userId,
+            OrganizationId organizationId,
+            CancellationToken ct)
+            => await _context.ChatSessions
+                .AsNoTracking()
+                .Where(cs => cs.OrganizationId == organizationId)
+                .Where(cs => _context.ChatSessionMembers
+                    .Any(m => m.ChatSessionId == cs.Id && m.UserId == userId))
+                .OrderByDescending(cs => cs.UpdatedAt)
+                .ToListAsync(ct);
+
+        public Task<ChatSession?> FindDirectSessionAsync(
+            UserId userA,
+            UserId userB,
+            OrganizationId organizationId,
+            CancellationToken ct)
+            => _context.ChatSessions
+                .Where(cs => cs.OrganizationId == organizationId)
+                .Where(cs => _context.ChatSessionMembers
+                    .Any(m => m.ChatSessionId == cs.Id && m.UserId == userA))
+                .Where(cs => _context.ChatSessionMembers
+                    .Any(m => m.ChatSessionId == cs.Id && m.UserId == userB))
+                .FirstOrDefaultAsync(ct);
+
+        public Task<bool> IsMemberAsync(ChatSessionId sessionId, UserId userId, CancellationToken ct)
+            => _context.ChatSessionMembers
+                .AnyAsync(m => m.ChatSessionId == sessionId && m.UserId == userId, ct);
+
+        public void Add(ChatSessionMember member) => _context.ChatSessionMembers.Add(member);
+        public void Remove(ChatSessionMember member) => _context.ChatSessionMembers.Remove(member);
+    }
+}
