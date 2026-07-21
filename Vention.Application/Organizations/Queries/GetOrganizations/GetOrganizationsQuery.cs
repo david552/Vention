@@ -3,6 +3,5 @@ using Vention.Application.Organizations.Contracts;
 
 namespace Vention.Application.Organizations.Queries.GetOrganizations
 {
-    public sealed record GetOrganizationsQuery : IQuery<IReadOnlyList<OrganizationResponse>>;
-
+    public sealed record GetOrganizationsQuery(Guid ActingUserId): IQuery<IReadOnlyList<OrganizationResponse>>;
 }

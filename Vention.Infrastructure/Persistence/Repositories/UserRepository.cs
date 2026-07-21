@@ -29,5 +29,17 @@ namespace Vention.Infrastructure.Persistence.Repositories
             => _context.Users.AnyAsync(u => u.Id == id, ct);
 
         public void Add(User user) => _context.Users.Add(user);
+
+        public async Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyCollection<UserId> ids, CancellationToken ct)
+        {
+            if (ids.Count == 0)
+                return Array.Empty<User>();
+
+
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => ids.Contains(u.Id))
+                .ToListAsync(ct);
+        }
     }
 }

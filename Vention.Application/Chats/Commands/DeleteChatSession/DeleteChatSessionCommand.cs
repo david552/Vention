@@ -3,6 +3,6 @@
 
 namespace Vention.Application.Chats.Commands.DeleteChatSession
 {
-    public sealed record DeleteChatSessionCommand(Guid Id) : ICommand;
+    public sealed record DeleteChatSessionCommand(Guid Id, Guid RequestingUserId) : ICommand;
 
 }

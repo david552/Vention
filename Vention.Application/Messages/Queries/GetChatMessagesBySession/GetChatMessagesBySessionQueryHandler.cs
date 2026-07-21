@@ -5,6 +5,7 @@ using Vention.Application.Messages.Contracts;
 using Vention.Application.Messaging;
 using Vention.Domain.Chats;
 using Vention.Domain.Messages;
+using Vention.Domain.Users;
 namespace Vention.Application.Messages.Queries.GetChatMessagesBySession
 {
     public sealed class GetChatMessagesBySessionQueryHandler
@@ -12,20 +13,30 @@ namespace Vention.Application.Messages.Queries.GetChatMessagesBySession
     {
         private readonly IChatMessageRepository _chatMessageRepository;
         private readonly IChatSessionRepository _chatSessionRepository;
+        private readonly IChatSessionMemberRepository _memberRepository;
+
         public GetChatMessagesBySessionQueryHandler(
             IChatMessageRepository chatMessageRepository,
-            IChatSessionRepository chatSessionRepository)
+            IChatSessionRepository chatSessionRepository,
+            IChatSessionMemberRepository memberRepository)
         {
             _chatMessageRepository = chatMessageRepository;
             _chatSessionRepository = chatSessionRepository;
+            _memberRepository = memberRepository;
         }
         public async Task<CursorPage<ChatMessageResponse>> Handle(
           GetChatMessagesBySessionQuery query, CancellationToken ct)
         {
             var sessionId = new ChatSessionId(query.SessionId);
+            var requestingUserId = new UserId(query.RequestingUserId);
+
 
             if (!await _chatSessionRepository.ExistsByIdAsync(sessionId, ct))
                 throw new NotFoundException($"Chat session '{query.SessionId}' was not found.");
+
+            if (!await _memberRepository.IsMemberAsync(sessionId, requestingUserId, ct))
+                throw new ForbiddenException(
+                    $"User '{query.RequestingUserId}' is not a participant of chat session '{query.SessionId}'.");
 
             var pageSize = CursorCodec.NormalizePageSize(query.PageSize);
             DateTimeOffset? cursorCreatedAt = null;
@@ -40,6 +51,7 @@ namespace Vention.Application.Messages.Queries.GetChatMessagesBySession
 
             var rows = await _chatMessageRepository.GetPageBySessionIdAsync(
                 sessionId, cursorCreatedAt, cursorSequence, pageSize + 1, ct);
+
             string? nextCursor = null;
             if (rows.Count > pageSize)
             {

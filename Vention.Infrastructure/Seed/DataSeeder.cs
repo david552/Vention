@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vention.Application.Abstractions;
 using Vention.Domain.Chats;
 using Vention.Domain.Membership;
 using Vention.Domain.Messages;
@@ -15,21 +16,19 @@ namespace Vention.Infrastructure.Seed
 {
     public static class DataSeeder
     {
-        public static async Task SeedAsync(VentionDbContext context)
+        public static async Task SeedAsync(VentionDbContext context, IPasswordHasher passwordHasher)
         {
             if (await context.Set<User>().AnyAsync())
                 return;
-
-            //users
             var adminUser = User.Create(
                 Email.Create("admin@vention.com"),
                 "Admin User",
-                BCrypt.Net.BCrypt.HashPassword("Admin1234!"));
+                passwordHasher.Hash("Admin1234!"));
 
             var regularUser = User.Create(
                 Email.Create("david.piranishvili@vention.com"),
                 "David Piranishvili",
-                BCrypt.Net.BCrypt.HashPassword("User1234!"));
+                passwordHasher.Hash("User1234!"));
 
             context.Set<User>().AddRange(adminUser, regularUser);
 

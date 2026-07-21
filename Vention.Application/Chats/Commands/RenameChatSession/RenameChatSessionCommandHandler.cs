@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using Vention.Application.Abstractions;
+using Vention.Application.Authorization;
 using Vention.Application.Chats.Contracts;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
@@ -11,15 +12,24 @@ namespace Vention.Application.Chats.Commands.RenameChatSession
     {
         private readonly IChatSessionRepository _chatSessionRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ChatAuthorizationService _chatAuth;
 
-        public RenameChatSessionCommandHandler(IChatSessionRepository chatSessionRepository, IUnitOfWork unitOfWork)
+
+        public RenameChatSessionCommandHandler(
+            IChatSessionRepository chatSessionRepository,
+            IUnitOfWork unitOfWork,
+            ChatAuthorizationService chatAuth)
         {
             _chatSessionRepository = chatSessionRepository;
             _unitOfWork = unitOfWork;
+            _chatAuth = chatAuth;
+
         }
 
         public async Task<ChatSessionResponse> Handle(RenameChatSessionCommand command, CancellationToken ct)
         {
+            await _chatAuth.EnsureIsSessionMemberAsync(command.Id, command.RequestingUserId, ct);
+
             var chatSession = await _chatSessionRepository.GetByIdAsync(new ChatSessionId(command.Id), ct)
                 ?? throw new NotFoundException($"Chat session '{command.Id}' was not found.");
 

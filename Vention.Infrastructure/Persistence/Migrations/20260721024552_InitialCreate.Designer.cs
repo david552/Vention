@@ -12,7 +12,7 @@ using Vention.Infrastructure.Persistence;
 namespace Vention.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(VentionDbContext))]
-    [Migration("20260713180911_InitialCreate")]
+    [Migration("20260721024552_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

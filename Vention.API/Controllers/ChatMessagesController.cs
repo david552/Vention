@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Vention.API.Extensions;
 using Vention.Application.Common;
 using Vention.Application.Messages.Commands.DeleteChatMessage;
 using Vention.Application.Messages.Commands.SendChatMessage;
@@ -10,7 +11,7 @@ using Vention.Application.Messaging;
 namespace Vention.API.Controllers
 {
     [ApiController]
-    [Route("api/chat-sessions/{sessionId:guid}/messages")]
+    [Route("chats/sessions/{sessionId:guid}/messages")]
     public sealed class ChatMessagesController : ControllerBase
     {
         private readonly IDispatcher _dispatcher;
@@ -22,8 +23,10 @@ namespace Vention.API.Controllers
             [FromBody] SendChatMessageRequest request,
             CancellationToken ct)
         {
-            var command = new SendChatMessageCommand(sessionId, request.SenderId, request.Content);
+            var command = new SendChatMessageCommand(sessionId, User.GetUserId(), request.Content);
+
             var result = await _dispatcher.Send(command, ct);
+
             return CreatedAtAction(nameof(GetById), new { sessionId, id = result.Id }, result);
         }
 
@@ -36,7 +39,7 @@ namespace Vention.API.Controllers
         {
 
             var result = await _dispatcher.Send(
-                new GetChatMessagesBySessionQuery(sessionId, cursor, pageSize), ct);
+                new GetChatMessagesBySessionQuery(sessionId, User.GetUserId(), cursor, pageSize), ct);
 
             return Ok(result);
         }
@@ -47,7 +50,7 @@ namespace Vention.API.Controllers
             Guid id,
             CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetChatMessageByIdQuery(id), ct);
+            var result = await _dispatcher.Send(new GetChatMessageByIdQuery(id, User.GetUserId()), ct);
             return Ok(result);
         }
 
@@ -57,10 +60,10 @@ namespace Vention.API.Controllers
             Guid id,
             CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteChatMessageCommand(id), ct);
+            await _dispatcher.Send(new DeleteChatMessageCommand(id, User.GetUserId()), ct);
             return NoContent();
         }
     }
 
-    public sealed record SendChatMessageRequest(Guid SenderId, string Content);
+    public sealed record SendChatMessageRequest(string Content);
 }

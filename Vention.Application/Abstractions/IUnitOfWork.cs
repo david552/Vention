@@ -2,7 +2,7 @@
 
 namespace Vention.Application.Abstractions
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
         Task<int> SaveChangesAsync(CancellationToken ct = default);
         Task BeginTransactionAsync(IsolationLevel level = IsolationLevel.ReadCommitted, CancellationToken ct = default);

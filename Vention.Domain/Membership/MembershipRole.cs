@@ -4,7 +4,9 @@
     {
         Owner = 0,
         Admin = 1,
-        Member = 2
+        Editor = 2,
+        Member = 3,
+        Viewer = 4
     }
 
 }

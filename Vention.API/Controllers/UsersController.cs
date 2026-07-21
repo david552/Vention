@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Vention.API.Extensions;
 using Vention.Application.Messaging;
 using Vention.Application.Users.Commands.CreateUser;
 using Vention.Application.Users.Commands.DeleteUser;
@@ -10,13 +13,14 @@ using Vention.Application.Users.Queries.GetUsers;
 namespace Vention.API.Controllers
 {
     [ApiController]
-    [Route("api/users")]
+    [Route("users")]
     public sealed class UsersController : ControllerBase
     {
         private readonly IDispatcher _dispatcher;
         public UsersController(IDispatcher dispatcher) => _dispatcher = dispatcher;
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitingExtensions.AuthPolicy)]
         public async Task<ActionResult<UserResponse>> Create(CreateUserCommand command, CancellationToken ct)
         {
             var result = await _dispatcher.Send(command, ct);
@@ -27,7 +31,7 @@ namespace Vention.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserResponse>> GetById(Guid id, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetUserByIdQuery(id), ct);
+            var result = await _dispatcher.Send(new GetUserByIdQuery(id,User.GetUserId()), ct);
 
             return Ok(result);
         }
@@ -35,15 +39,16 @@ namespace Vention.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<UserResponse>>> GetAll(CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetUsersQuery(), ct);
+            var result = await _dispatcher.Send(new GetUsersQuery(User.GetUserId()), ct);
 
             return Ok(result);
         }
 
         [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
         public async Task<ActionResult<UserResponse>> Update(Guid id, [FromBody] UpdateUserRequest request, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new UpdateUserCommand(id, request.Name), ct);
+            var result = await _dispatcher.Send(new UpdateUserCommand(id, request.Name, User.GetUserId()), ct);
 
             return Ok(result);
         }
@@ -51,7 +56,7 @@ namespace Vention.API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteUserCommand(id), ct);
+            await _dispatcher.Send(new DeleteUserCommand(id, User.GetUserId()), ct);
 
             return NoContent();
         }

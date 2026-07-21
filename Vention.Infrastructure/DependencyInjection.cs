@@ -30,6 +30,7 @@ namespace Vention.Infrastructure
             services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
             services.AddScoped<IChatSessionMemberRepository, ChatSessionMemberRepository>();
             services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
             return services;
         }

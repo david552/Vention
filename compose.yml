@@ -15,6 +15,10 @@ services:
       - RabbitMqSettings__Host=vention-rabbitmq
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__AccessTokenMinutes=${JWT_EXPIRATION_MINUTES}
     networks:
       - vention-network
     depends_on:

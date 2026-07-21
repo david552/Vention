@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Vention.API.Authorization;
+using Vention.API.Extensions;
 using Vention.Application.Messaging;
 using Vention.Application.Organizations.Commands.CreateOrganization;
 using Vention.Application.Organizations.Commands.DeleteOrganization;
@@ -6,25 +8,29 @@ using Vention.Application.Organizations.Commands.UpdateOrganization;
 using Vention.Application.Organizations.Contracts;
 using Vention.Application.Organizations.Queries.GetOrganizationById;
 using Vention.Application.Organizations.Queries.GetOrganizations;
+using Vention.Domain.Membership;
 
 namespace Vention.API.Controllers
 {
     [ApiController]
-    [Route("api/organizations")]
+    [Route("orgs")]
     public sealed class OrganizationsController : ControllerBase
     {
         private readonly IDispatcher _dispatcher;
         public OrganizationsController(IDispatcher dispatcher) => _dispatcher = dispatcher;
 
         [HttpPost]
-        public async Task<ActionResult<OrganizationResponse>> Create(CreateOrganizationCommand command, CancellationToken ct)
+        public async Task<ActionResult<OrganizationResponse>> Create([FromBody] CreateOrganizationRequest request, CancellationToken ct)
         {
+
+            var command = new CreateOrganizationCommand(request.Name, User.GetUserId());
             var result = await _dispatcher.Send(command, ct);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpGet("{id:guid}")]
+        [RequireOrganizationRole("id", MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Member)]
         public async Task<ActionResult<OrganizationResponse>> GetById(Guid id, CancellationToken ct)
         {
             var result = await _dispatcher.Send(new GetOrganizationByIdQuery(id), ct);
@@ -35,12 +41,14 @@ namespace Vention.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<OrganizationResponse>>> GetAll(CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetOrganizationsQuery(), ct);
+            var result = await _dispatcher.Send(new GetOrganizationsQuery(User.GetUserId()), ct);
 
             return Ok(result);
         }
 
         [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
+        [RequireOrganizationRole("id", MembershipRole.Owner, MembershipRole.Admin)] 
         public async Task<ActionResult<OrganizationResponse>> Update(Guid id, [FromBody] UpdateOrganizationRequest request, CancellationToken ct)
         {
             var result = await _dispatcher.Send(new UpdateOrganizationCommand(id, request.Name), ct);
@@ -49,6 +57,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [RequireOrganizationRole("id", MembershipRole.Owner)] 
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             await _dispatcher.Send(new DeleteOrganizationCommand(id), ct);
@@ -57,5 +66,6 @@ namespace Vention.API.Controllers
         }
     }
 
+    public sealed record CreateOrganizationRequest(string Name);
     public sealed record UpdateOrganizationRequest(string Name);
 }
