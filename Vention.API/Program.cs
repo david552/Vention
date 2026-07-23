@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using Vention.API.ExceptionHandlers;
 using Vention.API.Extensions;
+using Vention.API.GrpcServices;
+using Vention.API.Interceptors;
 using Vention.Application;
 using Vention.Infrastructure;
 
@@ -14,6 +16,11 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services
     .AddControllers()
     .AddVentionJsonOptions();
+
+builder.Services.AddGrpc(options =>
+{
+    options.Interceptors.Add<GrpcExceptionInterceptor>();
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -55,6 +62,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGrpcService<UserGrpcService>();
+
 
 await app.SeedDatabaseAsync();
 
