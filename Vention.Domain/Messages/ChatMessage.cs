@@ -1,7 +1,8 @@
-﻿using Vention.Domain.Common;
+﻿using Vention.Domain.Chats;
+using Vention.Domain.Common;
 using Vention.Domain.Users;
 
-namespace Vention.Domain.Chats
+namespace Vention.Domain.Messages
 {
     public sealed class ChatMessage : AggregateRoot<ChatMessageId>
     {

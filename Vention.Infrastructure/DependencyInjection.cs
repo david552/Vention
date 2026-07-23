@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Vention.Application.Abstractions;
 using Vention.Domain.Chats;
 using Vention.Domain.Membership;
+using Vention.Domain.Messages;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
 using Vention.Infrastructure.Persistence;
@@ -16,7 +18,9 @@ namespace Vention.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<VentionDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("PostgresConnection")));
+                options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"))
+                .EnableSensitiveDataLogging()
+                .LogTo(Console.WriteLine, LogLevel.Information));
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -26,7 +30,6 @@ namespace Vention.Infrastructure
             services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
             services.AddScoped<IChatSessionMemberRepository, ChatSessionMemberRepository>();
             services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
-            services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
             return services;
         }

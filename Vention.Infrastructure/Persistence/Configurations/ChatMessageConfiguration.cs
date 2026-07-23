@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Vention.Domain.Chats;
+using Vention.Domain.Messages;
 using Vention.Domain.Users;
 
 namespace Vention.Infrastructure.Persistence.Configurations
@@ -32,6 +33,11 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .HasColumnName("content")
                 .IsRequired();
 
+            builder.Property<long>("Sequence")
+                .HasColumnName("sequence")
+                .ValueGeneratedOnAdd()
+                .UseIdentityAlwaysColumn();
+
             builder.Property(cm => cm.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamptz")
@@ -46,6 +52,12 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(cm => cm.ChatSessionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.HasIndex(cm => new { cm.ChatSessionId, cm.CreatedAt, cm.Id });
+
+            builder.HasIndex("ChatSessionId", "CreatedAt", "Sequence")
+                .HasDatabaseName("ix_chat_messages_session_created_sequence");
         }
     }
 }

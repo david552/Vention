@@ -38,29 +38,29 @@ namespace Vention.Application.Chats.Commands.CreateChatSession
         public async Task<ChatSessionResponse> Handle(CreateChatSessionCommand command, CancellationToken ct)
         {
             var organizationId = new OrganizationId(command.OrganizationId);
-            var createdByUserId = new UserId(command.CreatedByUserId);
-            var participantUserId = new UserId(command.ParticipantUserId);
+            var initiatorId = new UserId(command.InitiatorUserId);
+            var participantId = new UserId(command.ParticipantUserId);
 
             if (!await _organizationRepository.ExistsByIdAsync(organizationId, ct))
                 throw new NotFoundException($"Organization '{command.OrganizationId}' was not found.");
 
-            if (!await _userRepository.ExistsByIdAsync(createdByUserId, ct))
-                throw new NotFoundException($"User '{command.CreatedByUserId}' was not found.");
+            if (!await _userRepository.ExistsByIdAsync(initiatorId, ct))
+                throw new NotFoundException($"User '{command.InitiatorUserId}' was not found.");
 
-            if (!await _userRepository.ExistsByIdAsync(participantUserId, ct))
+            if (!await _userRepository.ExistsByIdAsync(participantId, ct))
                 throw new NotFoundException($"User '{command.ParticipantUserId}' was not found.");
 
-            if (!await _membershipRepository.ExistsAsync(createdByUserId, organizationId, ct))
-                throw new InvalidOperationException($"User '{command.CreatedByUserId}' is not a member of organization '{command.OrganizationId}'.");
+            if (!await _membershipRepository.ExistsAsync(initiatorId, organizationId, ct))
+                throw new InvalidOperationException($"User '{command.InitiatorUserId}' is not a member of organization '{command.OrganizationId}'.");
 
-            if (!await _membershipRepository.ExistsAsync(participantUserId, organizationId, ct))
+            if (!await _membershipRepository.ExistsAsync(participantId, organizationId, ct))
                 throw new InvalidOperationException($"User '{command.ParticipantUserId}' is not a member of organization '{command.OrganizationId}'.");
 
-            var chatSession = ChatSession.Create(command.Title, organizationId, createdByUserId);
+            var chatSession = ChatSession.CreateDirectChat(organizationId, initiatorId, participantId);
             _chatSessionRepository.Add(chatSession);
 
-            _memberRepository.Add(ChatSessionMember.Create(chatSession.Id, createdByUserId));
-            _memberRepository.Add(ChatSessionMember.Create(chatSession.Id, participantUserId));
+            _memberRepository.Add(ChatSessionMember.Create(chatSession.Id, initiatorId));
+            _memberRepository.Add(ChatSessionMember.Create(chatSession.Id, participantId));
 
             await _unitOfWork.SaveChangesAsync(ct);
 

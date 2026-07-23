@@ -7,9 +7,12 @@ namespace Vention.Domain.Chats
     {
         Task<IReadOnlyList<ChatSessionMember>> GetBySessionIdAsync(ChatSessionId sessionId, CancellationToken ct);
 
-        Task<IReadOnlyList<ChatSession>> GetSessionsForUserAsync(
+        Task<IReadOnlyList<(ChatSession Session, long Sequence)>> GetSessionsForUserPageAsync(
             UserId userId,
             OrganizationId organizationId,
+            DateTimeOffset? cursorUpdatedAt,
+            long? cursorSequence,
+            int take,
             CancellationToken ct);
 
         Task<ChatSession?> FindDirectSessionAsync(

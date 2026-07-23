@@ -1,8 +1,8 @@
 using Mapster;
-using Vention.Application.Chats.Contracts;
-using Vention.Domain.Chats;
+using Vention.Application.Messages.Contracts;
+using Vention.Domain.Messages;
 
-namespace Vention.Application.Chats
+namespace Vention.Application.Messages
 {
     public sealed class ChatMessageMappingConfig : IRegister
     {
