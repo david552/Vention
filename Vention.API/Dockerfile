@@ -12,6 +12,7 @@ COPY ["Vention.Application/Vention.Application.csproj", "Vention.Application/"]
 COPY ["Vention.API/Vention.API.csproj", "Vention.API/"]
 COPY ["Vention.Infrastructure/Vention.Infrastructure.csproj", "Vention.Infrastructure/"]
 COPY ["Vention.Application.Tests/Vention.Application.Tests.csproj", "Vention.Application.Tests/"]
+COPY ["Vention.Worker/Vention.Worker.csproj", "Vention.Worker/"]
 
 RUN dotnet restore "Vention.sln"
 

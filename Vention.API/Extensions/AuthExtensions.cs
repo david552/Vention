@@ -73,8 +73,8 @@ namespace Vention.API.Extensions
 
             services.AddAuthorizationBuilder()
                 .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build());
+                .RequireAuthenticatedUser()
+                .Build());
 
             return services;
         }

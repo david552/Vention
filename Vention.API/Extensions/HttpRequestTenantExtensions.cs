@@ -1,6 +1,4 @@
-﻿using Vention.Application.Exceptions;
-
-namespace Vention.API.Extensions;
+﻿namespace Vention.API.Extensions;
 
 public static class HttpRequestTenantExtensions
 {

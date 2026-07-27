@@ -8,16 +8,13 @@ namespace Vention.API.ExceptionHandlers
     public sealed class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
-        private readonly IProblemDetailsService _problemDetailsService;
         private readonly IHostEnvironment _env;
 
         public GlobalExceptionHandler(
             ILogger<GlobalExceptionHandler> logger,
-            IProblemDetailsService problemDetailsService,
             IHostEnvironment env)
         {
             _logger = logger;
-            _problemDetailsService = problemDetailsService;
             _env = env;
         }
 
@@ -73,6 +70,13 @@ namespace Vention.API.ExceptionHandlers
                     title = "Forbidden";
                     detail = exception.Message;
                     type = "urn:problem-type:forbidden";
+                    break;
+
+                case FileStorageException storage:
+                    statusCode = StatusCodes.Status500InternalServerError;
+                    title = "File storage error";
+                    detail = storage.Message;
+                    type = "urn:problem-type:file-storage-error";
                     break;
 
                 default:

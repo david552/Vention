@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Vention.Application.Abstractions;
 using Vention.Domain.Chats;
+using Vention.Domain.Files;
 using Vention.Domain.Membership;
 using Vention.Domain.Messages;
 using Vention.Domain.Organizations;
@@ -31,6 +32,9 @@ namespace Vention.Infrastructure
             services.AddScoped<IChatSessionMemberRepository, ChatSessionMemberRepository>();
             services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.AddScoped<IFileStorageService, FileSystemFileStorageService>();
+            services.AddScoped<IStoredFileRepository, StoredFileRepository>();
+
 
             return services;
         }

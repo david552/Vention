@@ -19,6 +19,9 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__AccessTokenMinutes=${JWT_EXPIRATION_MINUTES}
+      - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+    volumes:
+      - file-storage-data:/app/Storage
     networks:
       - vention-network
     depends_on:
@@ -86,6 +89,8 @@ volumes:
   postgres-data:
   redis-data:
   rabbitmq-data:
+  file-storage-data:
+
 
 networks:
   vention-network:

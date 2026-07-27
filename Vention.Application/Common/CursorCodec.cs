@@ -14,11 +14,15 @@ namespace Vention.Application.Common
             try
             {
                 var raw = Encoding.UTF8.GetString(Convert.FromBase64String(cursor));
+
                 var sep = raw.LastIndexOf('|');
                 if (sep < 0) throw new FormatException();
+
                 var sortValue = DateTimeOffset.Parse(
                     raw[..sep], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
                 var sequence = long.Parse(raw[(sep + 1)..], CultureInfo.InvariantCulture);
+
                 return (sortValue, sequence);
             }
             catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException)
