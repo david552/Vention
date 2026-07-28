@@ -1,0 +1,29 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Vention.API.Protos";
+
+package user;
+
+service UserService {
+  rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse);
+}
+
+message GetUserByIdRequest {
+  string user_id = 1;
+  string acting_user_id = 2; 
+}
+
+message OrganizationMembership {
+  string id = 1;
+  string name = 2;
+  string role = 3;
+}
+
+message GetUserByIdResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  repeated OrganizationMembership organisations = 6;
+}

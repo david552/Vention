@@ -2,6 +2,6 @@
 
 namespace Vention.Application.Users.Commands.DeleteUser
 {
-    public sealed record DeleteUserCommand(Guid Id) : ICommand;
+    public sealed record DeleteUserCommand(Guid Id, Guid ActingUserId) : ICommand;
 
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Vention.Application.Abstractions;
 using Vention.Infrastructure.Persistence;
 using Vention.Infrastructure.Seed;
 
@@ -14,10 +15,11 @@ namespace Vention.API.Extensions
             try
             {
                 var context = services.GetRequiredService<VentionDbContext>();
+                var passwordHasher = services.GetRequiredService<IPasswordHasher>();
 
                 await context.Database.MigrateAsync();
 
-                await DataSeeder.SeedAsync(context);
+                await DataSeeder.SeedAsync(context, passwordHasher);
             }
             catch (Exception ex)
             {

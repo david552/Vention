@@ -3,5 +3,5 @@ using Vention.Application.Messaging;
 
 namespace Vention.Application.Messages.Queries.GetChatMessageById
 {
-    public sealed record GetChatMessageByIdQuery(Guid Id) : IQuery<ChatMessageResponse>;
+    public sealed record GetChatMessageByIdQuery(Guid Id, Guid RequestingUserId) : IQuery<ChatMessageResponse>;
 }

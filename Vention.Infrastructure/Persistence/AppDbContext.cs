@@ -16,7 +16,6 @@ namespace Vention.Infrastructure.Persistence
         public DbSet<Membership> Memberships => Set<Membership>();
         public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
         public DbSet<ChatSessionMember> ChatSessionMembers => Set<ChatSessionMember>();
-
         public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

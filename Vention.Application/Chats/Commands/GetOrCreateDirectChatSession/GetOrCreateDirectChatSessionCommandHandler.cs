@@ -95,10 +95,14 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
                 // all pending inserts commit together in this explicit transaction
 
                 await _unitOfWork.SaveChangesAsync(ct);
+
+                await _unitOfWork.CommitTransactionAsync(ct);
                 return session.Adapt<ChatSessionResponse>();
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync(ct);
+
                 // Unique index lost the race → return the row the other request created
                 var raced = await _memberRepository.FindDirectSessionAsync(
                     initiatorId, participantId, organizationId, ct)

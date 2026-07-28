@@ -29,6 +29,8 @@ namespace Vention.Domain.Organizations
 
         public void Rename(string name)
         {
+            EnsureNotDeleted();
+
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be empty.", nameof(name));
 

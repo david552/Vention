@@ -10,7 +10,8 @@ namespace Vention.Application.Users
         {
             config.NewConfig<User, UserResponse>()
                 .Map(dest => dest.Id, src => src.Id.Value)
-                .Map(dest => dest.Email, src => src.Email.Value);
+                .Map(dest => dest.Email, src => src.Email.Value)
+                .Map(dest => dest.Organisations, _ => new List<UserOrganizationMembershipResponse>());
         }
     }
 }

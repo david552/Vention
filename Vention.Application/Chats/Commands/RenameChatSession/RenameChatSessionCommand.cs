@@ -3,6 +3,6 @@ using Vention.Application.Messaging;
 
 namespace Vention.Application.Chats.Commands.RenameChatSession
 {
-    public sealed record RenameChatSessionCommand(Guid Id, string Title) : ICommand<ChatSessionResponse>;
+    public sealed record RenameChatSessionCommand(Guid Id, string Title, Guid RequestingUserId) : ICommand<ChatSessionResponse>;
 
 }

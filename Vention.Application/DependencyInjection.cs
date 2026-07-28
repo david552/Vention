@@ -1,8 +1,10 @@
-﻿using Mapster;
+﻿using FluentValidation;
+using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Vention.Application.Authorization;
 using Vention.Application.Messaging;
-using Vention.Application.Vention.Application;
+using Vention.Application.Users;
 
 namespace Vention.Application
 {
@@ -11,14 +13,22 @@ namespace Vention.Application
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IDispatcher, Dispatcher>();
+            services.AddScoped<UserAuthorizationService>();
+            services.AddScoped<OrganizationAuthorizationService>();
+            services.AddScoped<ChatAuthorizationService>();
+            services.AddScoped<UserResponseComposer>();
+            services.AddScoped<ActiveOrganizationContextService>(); 
 
             var assembly = typeof(DependencyInjection).Assembly;
+
+            services.AddValidatorsFromAssembly(assembly);
+
             RegisterOpenGenericImplementations(services, assembly, typeof(ICommandHandler<,>));
             RegisterOpenGenericImplementations(services, assembly, typeof(ICommandHandler<>));
             RegisterOpenGenericImplementations(services, assembly, typeof(IQueryHandler<,>));
             RegisterOpenGenericImplementations(services, assembly, typeof(IQueryHandler<>));
 
-            TypeAdapterConfig.GlobalSettings.Scan(typeof(DependencyInjection).Assembly);
+            TypeAdapterConfig.GlobalSettings.Scan(assembly);
 
             return services;
         }

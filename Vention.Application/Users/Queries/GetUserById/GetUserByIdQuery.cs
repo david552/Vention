@@ -3,6 +3,6 @@ using Vention.Application.Users.Contracts;
 
 namespace Vention.Application.Users.Queries.GetUserById
 {
-    public sealed record GetUserByIdQuery(Guid Id) : IQuery<UserResponse>;
+    public sealed record GetUserByIdQuery(Guid Id, Guid ActingUserId) : IQuery<UserResponse>;
 
 }

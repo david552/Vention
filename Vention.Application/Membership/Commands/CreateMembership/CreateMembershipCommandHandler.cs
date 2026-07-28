@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using Vention.Application.Abstractions;
+using Vention.Application.Authorization;
 using Vention.Application.Exceptions;
 using Vention.Application.Membership.Contracts;
 using Vention.Application.Messaging;
@@ -16,26 +17,34 @@ namespace Vention.Application.Membership.Commands.CreateMembership
         private readonly IUserRepository _userRepository;
         private readonly IOrganizationRepository _organizationRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly OrganizationAuthorizationService _orgAuth;
+
 
         public CreateMembershipCommandHandler(
             IMembershipRepository membershipRepository,
             IUserRepository userRepository,
             IOrganizationRepository organizationRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            OrganizationAuthorizationService orgAuth)
         {
             _membershipRepository = membershipRepository;
             _userRepository = userRepository;
             _organizationRepository = organizationRepository;
             _unitOfWork = unitOfWork;
+            _orgAuth = orgAuth;
+
         }
 
         public async Task<MembershipResponse> Handle(CreateMembershipCommand command, CancellationToken ct)
         {
             var userId = new UserId(command.UserId);
             var organizationId = new OrganizationId(command.OrganizationId);
+            var actingUserId = new UserId(command.ActingUserId);
 
             if (!Enum.TryParse<MembershipRole>(command.Role, ignoreCase: true, out var role))
                 throw new ArgumentException($"'{command.Role}' is not a valid membership role.", nameof(command.Role));
+
+            await _orgAuth.EnsureCanAssignRoleAsync(command.ActingUserId, command.OrganizationId, role, ct);
 
             if (!await _userRepository.ExistsByIdAsync(userId, ct))
                 throw new NotFoundException($"User '{command.UserId}' was not found.");
@@ -43,15 +52,26 @@ namespace Vention.Application.Membership.Commands.CreateMembership
             if (!await _organizationRepository.ExistsByIdAsync(organizationId, ct))
                 throw new NotFoundException($"Organization '{command.OrganizationId}' was not found.");
 
-            if (await _membershipRepository.ExistsAsync(userId, organizationId, ct))
-                throw new InvalidOperationException("This user is already a member of this organization.");
+            var existing = await _membershipRepository.GetByUserAndOrganizationAsync(userId, organizationId, ct);
+
+            if (existing is not null)
+            {
+                await _orgAuth.EnsureCanChangeMembershipRoleAsync(command.ActingUserId, existing, role, ct);
+                existing.ChangeRole(role);
+                await _unitOfWork.SaveChangesAsync(ct);
+                return existing.Adapt<MembershipResponse>();
+            }
 
             var membership = DomainMembership.Create(userId, organizationId, role);
-
             _membershipRepository.Add(membership);
+
             await _unitOfWork.SaveChangesAsync(ct);
 
             return membership.Adapt<MembershipResponse>();
+
+
         }
+
+
     }
 }
