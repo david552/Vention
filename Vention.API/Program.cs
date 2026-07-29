@@ -23,9 +23,12 @@ builder.Services.AddGrpc(options =>
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddOptions<FileStorageSettingsOptions>()
+    .Bind(builder.Configuration.GetSection("FileStorage"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services.AddOptions<CryptoSettingsOptions>()
     .Bind(builder.Configuration.GetSection("CryptoSettings"))
@@ -54,7 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRateLimiter();
 

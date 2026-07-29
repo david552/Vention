@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Vention.API.Extensions;
 using Vention.Application.Messaging;
@@ -21,9 +20,10 @@ namespace Vention.API.Controllers
 
         [HttpPost]
         [EnableRateLimiting(RateLimitingExtensions.AuthPolicy)]
-        public async Task<ActionResult<UserResponse>> Create(CreateUserCommand command, CancellationToken ct)
+        public async Task<ActionResult<UserResponse>> Create([FromBody] CreateUserRequest request, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(command, ct);
+            var result = await _dispatcher.Send(
+                new CreateUserCommand(request.Email, request.DisplayName, request.Password), ct);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
@@ -48,7 +48,7 @@ namespace Vention.API.Controllers
         [HttpPatch("{id:guid}")]
         public async Task<ActionResult<UserResponse>> Update(Guid id, [FromBody] UpdateUserRequest request, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new UpdateUserCommand(id, request.Name, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new UpdateUserCommand(id, request.DisplayName, User.GetUserId()), ct);
 
             return Ok(result);
         }
@@ -62,5 +62,7 @@ namespace Vention.API.Controllers
         }
     }
 
-    public sealed record UpdateUserRequest(string Name);
+    public sealed record UpdateUserRequest(string DisplayName);
+    public sealed record CreateUserRequest(string Email, string DisplayName, string Password);
+
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Vention.Domain.Chats;
+using Vention.Domain.Files;
 using Vention.Domain.Membership;
 using Vention.Domain.Messages;
 using Vention.Domain.Organizations;
@@ -17,6 +18,7 @@ namespace Vention.Infrastructure.Persistence
         public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
         public DbSet<ChatSessionMember> ChatSessionMembers => Set<ChatSessionMember>();
         public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+        public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
