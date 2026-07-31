@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using Vention.Application;
 using Vention.Application.Abstractions;
+using Vention.Application.Options;
 
 namespace Vention.Infrastructure
 {

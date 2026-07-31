@@ -14,7 +14,7 @@ public sealed class ActiveOrganizationContextService
         _membershipRepository = membershipRepository;
     }
 
-    public async Task<Vention.Domain.Membership.Membership> GetMembershipOrThrowAsync(
+    public async Task<Domain.Membership.Membership> GetMembershipOrThrowAsync(
         Guid userId,
         Guid organizationId,
         CancellationToken ct)

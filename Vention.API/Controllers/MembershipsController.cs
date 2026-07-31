@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.Json.Serialization;
 using Vention.API.Authorization;
-using Vention.API.Extensions;
+using Vention.Application.Abstractions;
 using Vention.Application.Membership.Commands.ChangeMembershipRole;
 using Vention.Application.Membership.Commands.CreateMembership;
 using Vention.Application.Membership.Commands.DeleteMembership;
@@ -20,13 +19,19 @@ namespace Vention.API.Controllers
     public sealed class MembershipsController : ControllerBase
     {
         private readonly IDispatcher _dispatcher;
-        public MembershipsController(IDispatcher dispatcher) => _dispatcher = dispatcher;
+        private readonly ICurrentUserService _currentUser;
+
+        public MembershipsController(IDispatcher dispatcher, ICurrentUserService currentUser)
+        {
+            _dispatcher = dispatcher;
+            _currentUser = currentUser;
+        }
 
         [HttpPost]
         public async Task<ActionResult<MembershipResponse>> Create([FromBody] CreateMembershipRequest request, CancellationToken ct)
         {
             var organizationId = request.ResolveOrganizationId();
-            var command = new CreateMembershipCommand(request.UserId, organizationId, request.Role, User.GetUserId());
+            var command = new CreateMembershipCommand(request.UserId, organizationId, request.Role, _currentUser.UserId);
             var result = await _dispatcher.Send(command, ct);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
@@ -35,7 +40,7 @@ namespace Vention.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<MembershipResponse>> GetById(Guid id, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetMembershipByIdQuery(id, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new GetMembershipByIdQuery(id, _currentUser.UserId), ct);
 
             return Ok(result);
         }
@@ -52,7 +57,7 @@ namespace Vention.API.Controllers
         [HttpGet("by-user/{userId:guid}")]
         public async Task<ActionResult<IReadOnlyList<MembershipResponse>>> GetByUser(Guid userId, CancellationToken ct)
         {
-            var actingUserId = User.GetUserId();
+            var actingUserId = _currentUser.UserId;
 
             if (userId != actingUserId)
                 return Forbid();
@@ -65,7 +70,7 @@ namespace Vention.API.Controllers
         [HttpPut("{id:guid}/role")]
         public async Task<ActionResult<MembershipResponse>> ChangeRole(Guid id, [FromBody] ChangeMembershipRoleRequest request, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new ChangeMembershipRoleCommand(id, request.Role, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new ChangeMembershipRoleCommand(id, request.Role, _currentUser.UserId), ct);
 
             return Ok(result);
         }
@@ -73,7 +78,7 @@ namespace Vention.API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteMembershipCommand(id, User.GetUserId()), ct);
+            await _dispatcher.Send(new DeleteMembershipCommand(id, _currentUser.UserId), ct);
 
             return NoContent();
         }
@@ -81,7 +86,7 @@ namespace Vention.API.Controllers
         [HttpDelete("{userId:guid}/{organizationId:guid}")]
         public async Task<IActionResult> DeleteByUserAndOrganization(Guid userId, Guid organizationId, CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteMembershipByUserAndOrganizationCommand(userId, organizationId, User.GetUserId()), ct);
+            await _dispatcher.Send(new DeleteMembershipByUserAndOrganizationCommand(userId, organizationId, _currentUser.UserId), ct);
 
             return NoContent();
         }

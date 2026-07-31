@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Vention.Application
+namespace Vention.Application.Options
 {
     public class CryptoSettingsOptions
     {

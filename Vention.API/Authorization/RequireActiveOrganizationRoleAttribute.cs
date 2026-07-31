@@ -1,7 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Vention.API.Extensions;
+using Vention.Application.Abstractions;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
@@ -30,12 +30,15 @@ public sealed class RequireActiveOrganizationRoleAttribute : Attribute, IAsyncAu
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        var userIdClaim = context.HttpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+        var currentUser = context.HttpContext.RequestServices.GetRequiredService<ICurrentUserService>();
+
+        if (!currentUser.IsAuthenticated)
         {
             context.Result = new UnauthorizedResult();
             return;
         }
+
+        var userId = currentUser.UserId;
 
         if (!context.HttpContext.Request.TryGetOrganizationId(out var organizationId))
         {

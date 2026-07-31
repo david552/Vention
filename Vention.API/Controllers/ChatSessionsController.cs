@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Vention.API.Authorization;
 using Vention.API.Extensions;
+using Vention.Application.Abstractions;
 using Vention.Application.Authorization;
 using Vention.Application.Chats.Commands.CreateChatSession;
 using Vention.Application.Chats.Commands.DeleteChatSession;
@@ -14,7 +15,6 @@ using Vention.Application.Chats.Queries.GetSessionsForUser;
 using Vention.Application.Common;
 using Vention.Application.Messaging;
 using Vention.Domain.Membership;
-using Vention.Domain.Users;
 
 namespace Vention.API.Controllers
 {
@@ -24,20 +24,25 @@ namespace Vention.API.Controllers
     {
         private readonly IDispatcher _dispatcher;
         private readonly ActiveOrganizationContextService _activeOrg;
+        private readonly ICurrentUserService _currentUser;
+
 
         public ChatSessionsController(
             IDispatcher dispatcher,
-            ActiveOrganizationContextService activeOrg)
+            ActiveOrganizationContextService activeOrg,
+            ICurrentUserService currentUser)
         {
             _dispatcher = dispatcher;
             _activeOrg = activeOrg;
+            _currentUser = currentUser;
+
         }
         [HttpPost]
         public async Task<ActionResult<ChatSessionResponse>> Create(
            CreateChatSessionRequest request,
            CancellationToken ct)
         {
-            var userId = User.GetUserId();
+            var userId = _currentUser.UserId;
 
 
             var organizationId = request.OrganizationId != Guid.Empty
@@ -62,7 +67,7 @@ namespace Vention.API.Controllers
            CreateChatSessionRequest request,
             CancellationToken ct)
         {
-            var userId = User.GetUserId();
+            var userId = _currentUser.UserId;
 
             var organizationId = request.OrganizationId != Guid.Empty
                 ? request.OrganizationId
@@ -83,7 +88,7 @@ namespace Vention.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ChatSessionResponse>> GetById(Guid id, CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetChatSessionByIdQuery(id, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new GetChatSessionByIdQuery(id, _currentUser.UserId), ct);
             return Ok(result);
         }
 
@@ -95,7 +100,7 @@ namespace Vention.API.Controllers
            [FromQuery] int pageSize = 50,
            CancellationToken ct = default)
         {
-            if (userId != User.GetUserId())
+            if (userId != _currentUser.UserId)
                 return Forbid();
 
             await _activeOrg.EnsureIsMemberAsync(userId, organizationId, ct);
@@ -123,7 +128,7 @@ namespace Vention.API.Controllers
             Guid id,
             CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetChatSessionMembersQuery(id, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new GetChatSessionMembersQuery(id, _currentUser.UserId), ct);
             return Ok(result);
         }
 
@@ -136,7 +141,7 @@ namespace Vention.API.Controllers
         [FromQuery] int pageSize = 50,
         CancellationToken ct = default)
         {
-            var userId = User.GetUserId();
+            var userId = _currentUser.UserId;
             var organizationId = Request.GetRequiredOrganizationId();
             var result = await _dispatcher.Send(
                 new GetSessionsForUserQuery(userId, organizationId, cursor, pageSize), ct);
@@ -150,14 +155,14 @@ namespace Vention.API.Controllers
             [FromBody] RenameChatSessionRequest request,
             CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new RenameChatSessionCommand(id, request.Title, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new RenameChatSessionCommand(id, request.Title, _currentUser.UserId), ct);
             return Ok(result);
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteChatSessionCommand(id, User.GetUserId()), ct);
+            await _dispatcher.Send(new DeleteChatSessionCommand(id, _currentUser.UserId), ct);
             return NoContent();
         }
     }

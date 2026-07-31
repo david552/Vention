@@ -2,8 +2,8 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Vention.Application;
 using Vention.Application.Abstractions;
+using Vention.Application.Options;
 using Vention.Domain.Users;
 
 namespace Vention.Infrastructure

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
-using Vention.Application;
 using Vention.Application.Abstractions;
 using Vention.Application.Exceptions;
+using Vention.Application.Options;
 
 namespace Vention.Infrastructure
 {

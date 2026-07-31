@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.IdentityModel.Tokens.Jwt;
+using Vention.Application.Abstractions;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
@@ -21,13 +21,15 @@ namespace Vention.API.Authorization
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            var userIdClaim = context.HttpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var currentUser = context.HttpContext.RequestServices.GetRequiredService<ICurrentUserService>();
 
-            if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+            if (!currentUser.IsAuthenticated)
             {
-                context.Result = new Microsoft.AspNetCore.Mvc.UnauthorizedResult();
+                context.Result = new UnauthorizedResult();
                 return;
             }
+
+            var userId = currentUser.UserId;
 
             if (!context.RouteData.Values.TryGetValue(_organizationIdRouteKey, out var raw)
                 || raw is null
