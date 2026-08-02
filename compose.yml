@@ -34,6 +34,31 @@ services:
       vention-rabbitmq:
         condition: service_healthy
 
+  processor:
+    container_name: vention-processor
+    user: "0:0"
+    build:
+      context: .
+      dockerfile: Vention.Processor/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
+      - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
+      - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+    volumes:
+      - file-storage-data:/app/Storage
+    networks:
+      - vention-network
+    depends_on:
+      vention-postgres:
+        condition: service_healthy
+      vention-rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+
   api-gateway:
     container_name: vention-api-gateway
     build:

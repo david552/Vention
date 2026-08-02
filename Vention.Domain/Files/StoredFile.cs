@@ -107,6 +107,13 @@ namespace Vention.Domain.Files
             ProcessingError = processingError.Trim();
             UpdatedAt = DateTimeOffset.UtcNow;
         }
+
+        public void MarkProcessing()
+        {
+            Status = FileStatus.Processing;
+            ProcessingError = null;
+            UpdatedAt = DateTimeOffset.UtcNow;
+        }
     }
 
     public record StoredFileId(Guid Value);

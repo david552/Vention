@@ -14,6 +14,7 @@ COPY ["Vention.Infrastructure/Vention.Infrastructure.csproj", "Vention.Infrastru
 COPY ["Vention.Application.Tests/Vention.Application.Tests.csproj", "Vention.Application.Tests/"]
 COPY ["Vention.Worker/Vention.Worker.csproj", "Vention.Worker/"]
 COPY ["ApiGateway/ApiGateway.csproj", "ApiGateway/"]
+COPY ["Vention.Processor/Vention.Processor.csproj", "Vention.Processor/"]
 
 RUN dotnet restore "Vention.sln"
 
