@@ -30,6 +30,9 @@ namespace Vention.Infrastructure.Persistence.Repositories
         public Task<bool> ExistsAsync(UserId userId, OrganizationId organizationId, CancellationToken ct)
             => _context.Memberships.AnyAsync(m => m.UserId == userId && m.OrganizationId == organizationId, ct);
 
+        public Task DeleteByOrganizationIdAsync(OrganizationId organizationId, CancellationToken ct)
+            => _context.Memberships.Where(m => m.OrganizationId == organizationId).ExecuteDeleteAsync(ct);
+
         public void Add(Membership membership) => _context.Memberships.Add(membership);
         public void Remove(Membership membership) => _context.Memberships.Remove(membership);
     }

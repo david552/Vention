@@ -41,5 +41,13 @@ namespace Vention.Infrastructure.Persistence.Repositories
                 .Where(u => ids.Contains(u.Id))
                 .ToListAsync(ct);
         }
+
+        public async Task<IReadOnlyList<User>> GetUsersWithNoMembershipsAsync(CancellationToken ct)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => !_context.Memberships.Any(m => m.UserId == u.Id))
+                .ToListAsync(ct);
+        }
     }
 }

@@ -26,18 +26,34 @@ namespace Vention.Application.Users.Queries.GetUsers
         {
             var actingUserId = new UserId(query.ActingUserId);
             var visibleUserIds = new HashSet<Guid> { query.ActingUserId };
+
             var actingMemberships = await _membershipRepository.GetByUserIdAsync(actingUserId, ct);
+
             foreach (var membership in actingMemberships)
             {
                 var orgMembers = await _membershipRepository.GetByOrganizationIdAsync(
                     membership.OrganizationId,
                     ct);
+
                 foreach (var orgMember in orgMembers)
                     visibleUserIds.Add(orgMember.UserId.Value);
             }
+
+            var isOwnerOrAdminAnywhere = actingMemberships
+                .Any(m => MembershipRoleRules.IsOwnerOrAdmin(m.Role));
+
+            if (isOwnerOrAdminAnywhere)
+            {
+                var orphans = await _userRepository.GetUsersWithNoMembershipsAsync(ct);
+
+                foreach (var orphan in orphans)
+                    visibleUserIds.Add(orphan.Id.Value);
+            }
+
             var users = await _userRepository.GetByIdsAsync(
                 visibleUserIds.Select(id => new UserId(id)).ToArray(),
                 ct);
+
             return await _composer.ComposeManyAsync(users, ct);
         }
     }

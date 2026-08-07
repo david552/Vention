@@ -25,7 +25,6 @@ namespace Vention.API.Extensions
                             QueueLimit = 0,
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst
                         }));
-
                 options.AddPolicy(UploadPolicy, httpContext =>
                     RateLimitPartition.GetFixedWindowLimiter(
                         partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
