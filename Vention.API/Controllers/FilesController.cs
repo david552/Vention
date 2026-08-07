@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using Vention.API.Authorization;
 using Vention.API.Extensions;
 using Vention.API.Filters;
+using Vention.Application.Abstractions;
 using Vention.Application.Files;
 using Vention.Application.Files.Commands.DeleteFile;
 using Vention.Application.Files.Commands.UploadFile;
@@ -16,7 +16,6 @@ using Vention.Domain.Membership;
 
 namespace Vention.API.Controllers
 {
-    [AllowAnonymous]
     [ApiController]
     [Route("files")]
     public sealed class FilesController : ControllerBase
@@ -25,8 +24,13 @@ namespace Vention.API.Controllers
 
         private const long MaxUploadRequestBytes = FileUploadRules.MaxFileSizeBytes + 1024 * 1024;
 
+        private readonly ICurrentUserService _currentUser;
         private readonly IDispatcher _dispatcher;
-        public FilesController(IDispatcher dispatcher) => _dispatcher = dispatcher;
+        public FilesController(IDispatcher dispatcher, ICurrentUserService currentUser)
+        {
+            _dispatcher = dispatcher;
+            _currentUser = currentUser;
+        }
 
         [HttpGet]
         [RequireActiveOrganizationRole]
@@ -64,7 +68,7 @@ namespace Vention.API.Controllers
                 file.ContentType,
                 file.Length,
                 organizationId,
-                User.GetUserId());
+                _currentUser.UserId);
 
             var result = await _dispatcher.Send(command, ct);
 
@@ -97,7 +101,7 @@ namespace Vention.API.Controllers
                     nameof(Request.ContentType));
 
             var organizationId = Request.GetRequiredOrganizationId();
-            var actingUserId = User.GetUserId();
+            var actingUserId = _currentUser.UserId;
 
             var reader = new MultipartReader(boundary, Request.Body);
             MultipartSection? section;
@@ -144,7 +148,7 @@ namespace Vention.API.Controllers
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             var organizationId = Request.GetRequiredOrganizationId();
-            await _dispatcher.Send(new DeleteFileCommand(id, organizationId, User.GetUserId()), ct);
+            await _dispatcher.Send(new DeleteFileCommand(id, organizationId, _currentUser.UserId), ct);
 
             return NoContent();
         }

@@ -1,11 +1,10 @@
 services:
   api:
     container_name: vention-api
+    user: "0:0"
     build:
       context: .
       dockerfile: Vention.API/Dockerfile
-    ports:
-      - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
@@ -20,6 +19,9 @@ services:
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__AccessTokenMinutes=${JWT_EXPIRATION_MINUTES}
       - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+      - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
+      - Gateway__UserIdHeaderName=X-User-Id
+      - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
     volumes:
       - file-storage-data:/app/Storage
     networks:
@@ -32,6 +34,26 @@ services:
       vention-rabbitmq:
         condition: service_healthy
 
+  api-gateway:
+    container_name: vention-api-gateway
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "5258:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
+      - ReverseProxy__Clusters__mainApi__Destinations__destination1__Address=http://api:8080/
+    networks:
+      - vention-network
+    depends_on:
+      - api
+
   vention-postgres:
     container_name: vention-postgres
     image: postgres:16-alpine
@@ -40,9 +62,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_SECRET_PASSWORD}
       - POSTGRES_DB=VentionDb
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data 
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - vention-network
     healthcheck:
@@ -53,15 +75,15 @@ services:
 
   vention-redis:
     container_name: vention-redis
-    image: redis:alpine 
+    image: redis:alpine
     ports:
-      - "6379:6379" 
+      - "6379:6379"
     volumes:
-      - redis-data:/data 
+      - redis-data:/data
     networks:
       - vention-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"] 
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -70,8 +92,8 @@ services:
     container_name: vention-rabbitmq
     image: rabbitmq:3-management-alpine
     ports:
-      - "5672:5672"  
-      - "15672:15672" 
+      - "5672:5672"
+      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBIT_SECRET_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBIT_SECRET_PASS}
@@ -95,4 +117,3 @@ volumes:
 networks:
   vention-network:
     driver: bridge
-  

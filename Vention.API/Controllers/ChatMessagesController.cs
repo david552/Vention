@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Vention.API.Extensions;
+using Vention.Application.Abstractions;
 using Vention.Application.Common;
 using Vention.Application.Messages.Commands.DeleteChatMessage;
 using Vention.Application.Messages.Commands.SendChatMessage;
@@ -15,7 +15,13 @@ namespace Vention.API.Controllers
     public sealed class ChatMessagesController : ControllerBase
     {
         private readonly IDispatcher _dispatcher;
-        public ChatMessagesController(IDispatcher dispatcher) => _dispatcher = dispatcher;
+        private readonly ICurrentUserService _currentUser;
+
+        public ChatMessagesController(IDispatcher dispatcher, ICurrentUserService currentUser)
+        {
+            _dispatcher = dispatcher;
+            _currentUser = currentUser;
+        }
 
         [HttpPost]
         public async Task<ActionResult<ChatMessageResponse>> Send(
@@ -23,7 +29,7 @@ namespace Vention.API.Controllers
             [FromBody] SendChatMessageRequest request,
             CancellationToken ct)
         {
-            var command = new SendChatMessageCommand(sessionId, User.GetUserId(), request.Content);
+            var command = new SendChatMessageCommand(sessionId, _currentUser.UserId, request.Content);
 
             var result = await _dispatcher.Send(command, ct);
 
@@ -39,7 +45,7 @@ namespace Vention.API.Controllers
         {
 
             var result = await _dispatcher.Send(
-                new GetChatMessagesBySessionQuery(sessionId, User.GetUserId(), cursor, pageSize), ct);
+                new GetChatMessagesBySessionQuery(sessionId, _currentUser.UserId, cursor, pageSize), ct);
 
             return Ok(result);
         }
@@ -50,7 +56,7 @@ namespace Vention.API.Controllers
             Guid id,
             CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetChatMessageByIdQuery(id, User.GetUserId()), ct);
+            var result = await _dispatcher.Send(new GetChatMessageByIdQuery(id, _currentUser.UserId), ct);
             return Ok(result);
         }
 
@@ -60,7 +66,7 @@ namespace Vention.API.Controllers
             Guid id,
             CancellationToken ct)
         {
-            await _dispatcher.Send(new DeleteChatMessageCommand(id, User.GetUserId()), ct);
+            await _dispatcher.Send(new DeleteChatMessageCommand(id, _currentUser.UserId), ct);
             return NoContent();
         }
     }

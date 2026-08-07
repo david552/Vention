@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
+using Vention.API.Services;
 using Vention.Application;
+using Vention.Application.Abstractions;
+using Vention.Application.Options;
 
 namespace Vention.API.Extensions
 {
@@ -19,7 +20,7 @@ namespace Vention.API.Extensions
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Paste the access token returned by /auth/login."
+                    Description = "JWT is validated by ApiGateway. Call the gateway on port 5258"
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -41,40 +42,25 @@ namespace Vention.API.Extensions
             return services;
         }
 
-        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddJwtSettings(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddOptions<JwtSettingsOptions>()
                 .Bind(configuration.GetSection("Jwt"))
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            var jwtSection = configuration.GetSection("Jwt");
+            return services;
+        }
+        public static IServiceCollection AddCurrentUserAccess(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHttpContextAccessor();
 
-            services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtSection["Issuer"],
-                        ValidateAudience = true,
-                        ValidAudience = jwtSection["Audience"],
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromSeconds(30),
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtSection["Secret"]!))
-                    };
-                });
+            services.AddOptions<GatewayOptions>()
+                .Bind(configuration.GetSection(GatewayOptions.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-            services.AddAuthorizationBuilder()
-                .SetFallbackPolicy(new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build());
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }
