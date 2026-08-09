@@ -3,6 +3,8 @@ using ApiGateway.Options;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Vention.Observability;
+using Vention.Observability.Extensions;
 using Yarp.ReverseProxy.Transforms;
 
 
@@ -33,6 +35,23 @@ builder.Services
             transform.ProxyRequest.Headers.Remove("X-Gateway-Secret");
             await ValueTask.CompletedTask;
         });
+
+        transformContext.AddRequestTransform(async transform =>
+        {
+            var correlationId = transform.HttpContext.GetCorrelationId()
+                ?? transform.HttpContext.Request.Headers[CorrelationIdConstants.HeaderName].FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(correlationId))
+            {
+                transform.ProxyRequest.Headers.Remove(CorrelationIdConstants.HeaderName);
+                transform.ProxyRequest.Headers.TryAddWithoutValidation(
+                    CorrelationIdConstants.HeaderName, correlationId);
+            }
+
+            await ValueTask.CompletedTask;
+        });
+
+
         if (!string.Equals(transformContext.Route.AuthorizationPolicy, "Anonymous", StringComparison.OrdinalIgnoreCase))
         {
             transformContext.AddRequestTransform(async transform =>
@@ -59,6 +78,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseCorrelationId();   
 
 app.UseAuthentication();
 app.UseAuthorization();
