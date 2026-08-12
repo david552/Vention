@@ -36,6 +36,11 @@ builder.Services.AddOptions<CryptoSettingsOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<RabbitMqSettingsOptions>()
+    .Bind(builder.Configuration.GetSection(RabbitMqSettingsOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
 

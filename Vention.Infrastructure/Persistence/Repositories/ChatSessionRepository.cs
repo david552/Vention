@@ -18,6 +18,9 @@ namespace Vention.Infrastructure.Persistence.Repositories
         public Task<bool> ExistsByIdAsync(ChatSessionId id, CancellationToken ct)
             => _context.ChatSessions.AnyAsync(cs => cs.Id == id, ct);
 
+        public Task DeleteByOrganizationIdAsync(OrganizationId organizationId, CancellationToken ct)
+            => _context.ChatSessions.Where(cs => cs.OrganizationId == organizationId).ExecuteDeleteAsync(ct);
+
         public void Add(ChatSession chatSession) => _context.ChatSessions.Add(chatSession);
         public void Remove(ChatSession chatSession) => _context.ChatSessions.Remove(chatSession);
     }

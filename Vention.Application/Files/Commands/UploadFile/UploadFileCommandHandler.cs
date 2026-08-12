@@ -2,6 +2,7 @@
 using Vention.Application.Abstractions;
 using Vention.Application.Common;
 using Vention.Application.Files.Contracts;
+using Vention.Application.Files.IntegrationEvents;
 using Vention.Application.Messaging;
 using Vention.Domain.Files;
 using Vention.Domain.Organizations;
@@ -14,15 +15,19 @@ namespace Vention.Application.Files.Commands.UploadFile
         private readonly IStoredFileRepository _storedFileRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IIntegrationEventPublisher _integrationEventPublisher;
+
 
         public UploadFileCommandHandler(
             IStoredFileRepository storedFileRepository,
             IFileStorageService fileStorageService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IIntegrationEventPublisher integrationEventPublisher)
         {
             _storedFileRepository = storedFileRepository;
             _fileStorageService = fileStorageService;
             _unitOfWork = unitOfWork;
+            _integrationEventPublisher = integrationEventPublisher;
         }
 
         public async Task<FileResponse> Handle(UploadFileCommand command, CancellationToken ct)
@@ -56,6 +61,7 @@ namespace Vention.Application.Files.Commands.UploadFile
 
             var existing = await _storedFileRepository.GetByOrganizationAndChecksumAsync(
                 organizationId, stored.Checksum, ct);
+
             if (existing is not null)
                 return existing.Adapt<FileResponse>();
 
@@ -69,6 +75,20 @@ namespace Vention.Application.Files.Commands.UploadFile
                 new UserId(command.ActingUserId));
 
             _storedFileRepository.Add(storedFile);
+
+            await _integrationEventPublisher.PublishAsync(
+                new FileIngestionRequested(
+                    storedFile.Id.Value,
+                    command.OrganizationId,
+                    command.ActingUserId,
+                    storedFile.Filename,
+                    storedFile.Checksum,
+                    storedFile.StorageKey,
+                    storedFile.ContentType,
+                    storedFile.Size,
+                    DateTimeOffset.UtcNow),
+                ct);
+
             await _unitOfWork.SaveChangesAsync(ct);
 
             return storedFile.Adapt<FileResponse>();

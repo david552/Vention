@@ -1,4 +1,5 @@
-﻿using Vention.Application.Abstractions;
+﻿using System.Data;
+using Vention.Application.Abstractions;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Domain.Chats;
@@ -31,18 +32,23 @@ namespace Vention.Application.Organizations.Commands.DeleteOrganization
             var organization = await _organizationRepository.GetByIdAsync(new OrganizationId(command.Id), ct)
                 ?? throw new NotFoundException($"Organization '{command.Id}' was not found.");
 
-            organization.Delete();
+            await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
 
+            try
+            {
+                await _membershipRepository.DeleteByOrganizationIdAsync(organization.Id, ct);
+                await _chatSessionRepository.DeleteByOrganizationIdAsync(organization.Id, ct);
 
-            var memberships = await _membershipRepository.GetByOrganizationIdAsync(organization.Id, ct);
-            foreach (var membership in memberships)
-                _membershipRepository.Remove(membership);
+                organization.Delete();
 
-            var chatSessions = await _chatSessionRepository.GetByOrganizationIdAsync(organization.Id, ct);
-            foreach (var chatSession in chatSessions)
-                _chatSessionRepository.Remove(chatSession);
-
-            await _unitOfWork.SaveChangesAsync(ct);
+                await _unitOfWork.SaveChangesAsync(ct);
+                await _unitOfWork.CommitTransactionAsync(ct);
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync(ct);
+                throw;
+            }
         }
     }
 }

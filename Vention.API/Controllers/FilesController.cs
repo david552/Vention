@@ -8,6 +8,7 @@ using Vention.API.Filters;
 using Vention.Application.Abstractions;
 using Vention.Application.Files;
 using Vention.Application.Files.Commands.DeleteFile;
+using Vention.Application.Files.Commands.ProcessFile;
 using Vention.Application.Files.Commands.UploadFile;
 using Vention.Application.Files.Contracts;
 using Vention.Application.Files.Queries.GetFiles;
@@ -138,6 +139,24 @@ namespace Vention.API.Controllers
                 "A 'file' section was not found in the multipart request.",
                 nameof(Request.Body));
         }
+
+        [HttpPost("{id:guid}/process")]
+        [RequireActiveOrganizationRole(
+           MembershipRole.Owner,
+           MembershipRole.Admin,
+           MembershipRole.Editor,
+           MembershipRole.Member)]
+        public async Task<ActionResult<FileResponse>> Process(Guid id, CancellationToken ct)
+        {
+            var organizationId = Request.GetRequiredOrganizationId();
+
+            var result = await _dispatcher.Send(
+                new ProcessFileCommand(id, organizationId, _currentUser.UserId),
+                ct);
+
+            return Ok(result);
+        }
+
 
         [HttpDelete("{id:guid}")]
         [RequireActiveOrganizationRole(

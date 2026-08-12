@@ -30,7 +30,7 @@ namespace Vention.Domain.Chats
             if (organizationId.Value == Guid.Empty)
                 throw new ArgumentException("OrganizationId cannot be empty.", nameof(organizationId));
 
-            var chatKey = Chats.DirectChatKey.Create(initiatorId, participantId);
+            var chatKey = DirectChatKey.Create(initiatorId, participantId);
 
             return new ChatSession(
                 new ChatSessionId(Guid.NewGuid()),
