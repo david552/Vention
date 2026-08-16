@@ -1,13 +1,13 @@
-using System.IdentityModel.Tokens.Jwt;
 using Vention.API.ExceptionHandlers;
 using Vention.API.Extensions;
 using Vention.API.GrpcServices;
 using Vention.API.Interceptors;
-using Vention.API.Middleware;
 using Vention.Application;
 using Vention.Application.Options;
 using Vention.Infrastructure;
 using Vention.Observability.Extensions;
+using Vention.Presentation.Common.Middleware;
+using Vention.Presentation.Common.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -49,8 +49,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddSwaggerWithAuth();
 builder.Services.AddJwtSettings(builder.Configuration);  
-builder.Services.AddCurrentUserAccess(builder.Configuration);
 builder.Services.AddVentionRateLimiting();
+builder.Services.AddPresentationGatewayAuth(builder.Configuration);
+
 
 var app = builder.Build();
 

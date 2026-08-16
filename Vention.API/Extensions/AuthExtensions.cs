@@ -1,8 +1,8 @@
 ﻿using Microsoft.OpenApi.Models;
-using Vention.API.Services;
 using Vention.Application;
 using Vention.Application.Abstractions;
 using Vention.Application.Options;
+using Vention.Presentation.Common.Services;
 
 namespace Vention.API.Extensions
 {

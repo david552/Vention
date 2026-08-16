@@ -1,0 +1,76 @@
+@gateway = http://localhost:5258
+@token = PASTE_JWT
+@userId = PASTE_USER_GUID
+@orgId = PASTE_ORG_GUID
+
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "query { users { id name email organisations { id name role } } }"
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "query($id: UUID!) { user(id: $id) { id name email organisations { id name role } } }",
+  "variables": { "id": "{{userId}}" }
+}
+
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "query { organizations { id name createdAt updatedAt } }"
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "query($id: UUID!) { organization(id: $id) { id name } }",
+  "variables": { "id": "{{orgId}}" }
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "mutation($input: CreateUserInput!) { createUser(input: $input) { id email name } }",
+  "variables": { "input": { "email": "graphql.demo@example.com", "name": "GraphQL Demo", "password": "Passw0rd!" } }
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "mutation($id: UUID!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id name } }",
+  "variables": { "id": "{{userId}}", "input": { "displayName": "Updated Via GraphQL" } }
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "mutation($input: CreateOrganizationInput!) { createOrganization(input: $input) { id name } }",
+  "variables": { "input": { "name": "GraphQL Demo Org" } }
+}
+
+POST {{gateway}}/graphql
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "mutation($id: UUID!, $input: UpdateOrganizationInput!) { updateOrganization(id: $id, input: $input) { id name } }",
+  "variables": { "id": "{{orgId}}", "input": { "name": "GraphQL Org Renamed" } }
+}

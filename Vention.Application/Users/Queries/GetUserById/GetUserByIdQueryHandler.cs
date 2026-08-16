@@ -1,4 +1,5 @@
-﻿using Vention.Application.Authorization;
+﻿using Mapster;
+using Vention.Application.Authorization;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Application.Users.Contracts;
@@ -25,8 +26,18 @@ namespace Vention.Application.Users.Queries.GetUserById
         public async Task<UserResponse> Handle(GetUserByIdQuery query, CancellationToken ct)
         {
             await _authService.EnsureCanViewUserAsync(query.Id, query.ActingUserId, ct);
+
             var user = await _userRepository.GetByIdAsync(new UserId(query.Id), ct)
                 ?? throw new NotFoundException($"User '{query.Id}' was not found.");
+
+            if (!query.IncludeOrganisations)
+            {
+                return user.Adapt<UserResponse>() with
+                {
+                    Organisations = Array.Empty<UserOrganizationMembershipResponse>()
+                };
+            }
+
             return await _composer.ComposeAsync(user, ct);
         }
     }

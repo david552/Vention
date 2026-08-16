@@ -6,6 +6,7 @@ namespace Vention.Domain.Membership
     public interface IMembershipRepository
     {
         Task<Membership?> GetByIdAsync(MembershipId id, CancellationToken ct);
+        Task<IReadOnlyList<Membership>> GetByUserIdsAsync(IReadOnlyCollection<UserId> userIds, UserId actingUserId, CancellationToken ct);
         Task<Membership?> GetByUserAndOrganizationAsync(UserId userId, OrganizationId organizationId, CancellationToken ct);
         Task<IReadOnlyList<Membership>> GetByOrganizationIdAsync(OrganizationId organizationId, CancellationToken ct);
         Task<IReadOnlyList<Membership>> GetByUserIdAsync(UserId userId, CancellationToken ct);
