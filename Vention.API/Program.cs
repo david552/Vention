@@ -1,3 +1,4 @@
+using Vention.API.Consumers;
 using Vention.API.ExceptionHandlers;
 using Vention.API.Extensions;
 using Vention.API.GrpcServices;
@@ -5,9 +6,10 @@ using Vention.API.Interceptors;
 using Vention.Application;
 using Vention.Application.Options;
 using Vention.Infrastructure;
+using Vention.Infrastructure.Messaging;
 using Vention.Observability.Extensions;
-using Vention.Presentation.Common.Middleware;
 using Vention.Presentation.Common.Extensions;
+using Vention.Presentation.Common.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -26,7 +28,6 @@ builder.Services.AddGrpc(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-
 builder.Services.AddOptions<FileStorageSettingsOptions>()
     .Bind(builder.Configuration.GetSection("FileStorage"))
     .ValidateDataAnnotations()
@@ -42,15 +43,25 @@ builder.Services.AddOptions<RabbitMqSettingsOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddOptions<SignalRRedisOptions>()
+    .Bind(builder.Configuration.GetSection(SignalRRedisOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
+builder.Services.AddApplicationServices();
+
+builder.Services.AddInfrastructure(
+    builder.Configuration,
+    MassTransitHostKind.Api,
+    typeof(FileStatusChangedConsumer).Assembly);
 
 
 builder.Services.AddSwaggerWithAuth();
-builder.Services.AddJwtSettings(builder.Configuration);  
+builder.Services.AddJwtSettings(builder.Configuration);
 builder.Services.AddVentionRateLimiting();
 builder.Services.AddPresentationGatewayAuth(builder.Configuration);
+
+builder.Services.AddVentionSignalR(builder.Configuration);
 
 
 var app = builder.Build();
@@ -77,8 +88,10 @@ app.UseRateLimiter();
 
 app.MapControllers();
 
+
 app.MapGrpcService<UserGrpcService>();
 
+app.MapVentionHubs();
 
 await app.SeedDatabaseAsync();
 

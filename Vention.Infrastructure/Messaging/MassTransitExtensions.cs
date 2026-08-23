@@ -20,12 +20,9 @@ namespace Vention.Infrastructure.Messaging
             {
                 x.SetKebabCaseEndpointNameFormatter();
 
-                if (hostKind == MassTransitHostKind.Worker)
+
+                if (consumerAssembly is not null)
                 {
-                    if (consumerAssembly is null)
-                        throw new ArgumentException(
-                            "Worker host requires a consumer assembly.",
-                            nameof(consumerAssembly));
 
                     x.AddConsumers(consumerAssembly);
 
@@ -46,12 +43,13 @@ namespace Vention.Infrastructure.Messaging
                                 TimeSpan.FromSeconds(1),
                                 TimeSpan.FromSeconds(5));
 
-                            r.Ignore<ArgumentException>();                 
-                            r.Ignore<NotFoundException>();               
+                            r.Ignore<ArgumentException>();
+                            r.Ignore<NotFoundException>();
                             r.Ignore<ValidationException>();
                         });
 
-                        cfg.UseEntityFrameworkOutbox<VentionDbContext>(context);
+                        if (hostKind == MassTransitHostKind.Worker)
+                            cfg.UseEntityFrameworkOutbox<VentionDbContext>(context);
                     });
                 }
 

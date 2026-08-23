@@ -11,7 +11,7 @@ namespace Vention.GraphQL.ErrorHandling
             if (error.Exception is RestApiException ex)
                 return error.WithCode(ex.Code ?? "REST_ERROR").WithMessage(ex.Message);
 
-            return error;
-        }
+            return error; 
+        } 
     }
 }

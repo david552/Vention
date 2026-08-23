@@ -47,6 +47,16 @@ namespace Vention.Application.Files.Commands.ProcessFile
                     DateTimeOffset.UtcNow),
                 ct);
 
+            await _integrationEventPublisher.PublishAsync(
+                new FileStatusChanged(
+                    storedFile.Id.Value,
+                    command.OrganizationId,
+                    command.ActingUserId,
+                    FileStatus.Processing,
+                    storedFile.Filename,
+                    DateTimeOffset.UtcNow),
+                ct);
+
             await _unitOfWork.SaveChangesAsync(ct);
 
             return storedFile.Adapt<FileResponse>();
