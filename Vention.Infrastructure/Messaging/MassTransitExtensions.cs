@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Reflection;
 using Vention.Application.Exceptions;
 using Vention.Application.Options;
+using Vention.Infrastructure.Messaging.Filters;
 using Vention.Infrastructure.Persistence;
 
 namespace Vention.Infrastructure.Messaging
@@ -30,6 +31,13 @@ namespace Vention.Infrastructure.Messaging
 
                     x.AddConfigureEndpointsCallback((context, name, cfg) =>
                     {
+                        cfg.PrefetchCount = 16;
+
+                        if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
+                        {
+                            rmq.ConcurrentMessageLimit = 8;
+                        }
+
                         cfg.UseMessageRetry(r =>
                         {
                             r.Intervals(
@@ -67,7 +75,12 @@ namespace Vention.Infrastructure.Messaging
                         h.Password(rabbitMq.Password);
                     });
 
+                    cfg.UsePublishFilter(typeof(CorrelationIdPublishFilter<>), context);
+                    cfg.UseSendFilter(typeof(CorrelationIdSendFilter<>), context);
+                    cfg.UseConsumeFilter(typeof(CorrelationIdConsumeFilter<>), context);
+
                     cfg.ConfigureEndpoints(context);
+
                 });
             });
 

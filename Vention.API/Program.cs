@@ -7,6 +7,7 @@ using Vention.API.Middleware;
 using Vention.Application;
 using Vention.Application.Options;
 using Vention.Infrastructure;
+using Vention.Observability.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -68,6 +69,7 @@ app.UseMiddleware<GatewayTrustMiddleware>();
 
 
 //app.UseHttpsRedirection();
+app.UseCorrelationId();
 
 
 app.UseRateLimiter();

@@ -35,7 +35,7 @@ services:
         condition: service_healthy
 
   processor:
-    container_name: vention-processor
+    # container_name: vention-processor
     user: "0:0"
     build:
       context: .
@@ -78,6 +78,8 @@ services:
       - vention-network
     depends_on:
       - api
+    deploy:
+      replicas: 2
 
   vention-postgres:
     container_name: vention-postgres

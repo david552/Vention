@@ -17,4 +17,8 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Vention.Observability\Vention.Observability.csproj" />
+  </ItemGroup>
+
 </Project>
