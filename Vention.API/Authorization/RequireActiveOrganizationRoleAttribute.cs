@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Vention.API.Extensions;
+using Vention.Presentation.Common.Extensions;
 using Vention.Application.Abstractions;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;

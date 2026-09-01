@@ -33,6 +33,24 @@ services:
         condition: service_healthy
       vention-rabbitmq:
         condition: service_healthy
+  graphql:
+    container_name: vention-graphql
+    user: "0:0"
+    build:
+      context: .
+      dockerfile: Vention.GraphQL/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
+      - Gateway__UserIdHeaderName=X-User-Id
+      - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
+      - RestApi__BaseAddress=http://api:8080/
+    networks:
+      - vention-network
+    depends_on:
+      api:
+        condition: service_started
 
   processor:
     # container_name: vention-processor
@@ -58,6 +76,8 @@ services:
         condition: service_healthy
       api:
         condition: service_started
+    deploy:
+      replicas: 2
 
   api-gateway:
     container_name: vention-api-gateway
@@ -74,12 +94,12 @@ services:
       - Jwt__Audience=${JWT_AUDIENCE}
       - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
       - ReverseProxy__Clusters__mainApi__Destinations__destination1__Address=http://api:8080/
+      - ReverseProxy__Clusters__graphqlApi__Destinations__destination1__Address=http://graphql:8080/
     networks:
       - vention-network
     depends_on:
       - api
-    deploy:
-      replicas: 2
+      - graphql
 
   vention-postgres:
     container_name: vention-postgres

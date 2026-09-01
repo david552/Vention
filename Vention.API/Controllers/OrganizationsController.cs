@@ -8,6 +8,7 @@ using Vention.Application.Organizations.Commands.UpdateOrganization;
 using Vention.Application.Organizations.Contracts;
 using Vention.Application.Organizations.Queries.GetOrganizationById;
 using Vention.Application.Organizations.Queries.GetOrganizations;
+using Vention.Application.Organizations.Queries.GetOrganizationsByIds;
 using Vention.Domain.Membership;
 
 namespace Vention.API.Controllers
@@ -45,11 +46,20 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<OrganizationResponse>>> GetAll(CancellationToken ct)
+        public async Task<ActionResult<IReadOnlyList<OrganizationResponse>>> GetAll(
+            [FromQuery] Guid[]? ids,
+            CancellationToken ct)
         {
-            var result = await _dispatcher.Send(new GetOrganizationsQuery(_currentUser.UserId), ct);
+            if (ids is { Length: > 0 })
+            {
+                var result = await _dispatcher.Send(
+                    new GetOrganizationsByIdsQuery(ids, _currentUser.UserId),
+                    ct);
+                return Ok(result);
+            }
 
-            return Ok(result);
+            var all = await _dispatcher.Send(new GetOrganizationsQuery(_currentUser.UserId), ct);
+            return Ok(all);
         }
 
         [HttpPut("{id:guid}")]

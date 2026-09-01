@@ -1,4 +1,5 @@
-﻿using Vention.Application.Messaging;
+﻿using Mapster;
+using Vention.Application.Messaging;
 using Vention.Application.Users.Contracts;
 using Vention.Domain.Membership;
 using Vention.Domain.Users;
@@ -53,6 +54,16 @@ namespace Vention.Application.Users.Queries.GetUsers
             var users = await _userRepository.GetByIdsAsync(
                 visibleUserIds.Select(id => new UserId(id)).ToArray(),
                 ct);
+
+            if (!query.IncludeOrganisations)
+            {
+                return users
+                    .Select(user => user.Adapt<UserResponse>() with
+                    {
+                        Organisations = Array.Empty<UserOrganizationMembershipResponse>()
+                    })
+                    .ToList();
+            }
 
             return await _composer.ComposeManyAsync(users, ct);
         }

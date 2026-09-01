@@ -13,8 +13,12 @@ COPY ["Vention.API/Vention.API.csproj", "Vention.API/"]
 COPY ["Vention.Infrastructure/Vention.Infrastructure.csproj", "Vention.Infrastructure/"]
 COPY ["Vention.Application.Tests/Vention.Application.Tests.csproj", "Vention.Application.Tests/"]
 COPY ["Vention.Worker/Vention.Worker.csproj", "Vention.Worker/"]
-COPY ["ApiGateway/ApiGateway.csproj", "ApiGateway/"]
 COPY ["Vention.Processor/Vention.Processor.csproj", "Vention.Processor/"]
+COPY ["ApiGateway/ApiGateway.csproj", "ApiGateway/"]
+COPY ["Vention.Observability/Vention.Observability.csproj", "Vention.Observability/"]
+COPY ["Vention.Presentation.Common/Vention.Presentation.Common.csproj", "Vention.Presentation.Common/"]
+COPY ["Vention.GraphQL/Vention.GraphQL.csproj", "Vention.GraphQL/"]
+COPY ["Vention.StressTests/Vention.StressTests.csproj", "Vention.StressTests/"]
 
 RUN dotnet restore "Vention.sln"
 

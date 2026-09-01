@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.35.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.80.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="8.0.29" />
 	 <Protobuf Include="Protos\user.proto" GrpcServices="Server" />
 	  <PackageReference Include="Grpc.Tools" Version="2.82.0">
       <PrivateAssets>all</PrivateAssets>
@@ -27,6 +28,7 @@
     <ProjectReference Include="..\Vention.Application\Vention.Application.csproj" />
     <ProjectReference Include="..\Vention.Infrastructure\Vention.Infrastructure.csproj" />
     <ProjectReference Include="..\Vention.Observability\Vention.Observability.csproj" />
+    <ProjectReference Include="..\Vention.Presentation.Common\Vention.Presentation.Common.csproj" />
   </ItemGroup>
 
 </Project>

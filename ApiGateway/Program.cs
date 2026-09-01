@@ -12,6 +12,15 @@ JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
+
 builder.Services.AddGatewayJwtAuthentication(builder.Configuration);
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
@@ -78,7 +87,9 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseCorrelationId();   
+app.UseCorrelationId();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

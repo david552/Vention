@@ -9,6 +9,7 @@ using Vention.Application.Membership.Contracts;
 using Vention.Application.Membership.Queries.GetMembershipById;
 using Vention.Application.Membership.Queries.GetMembershipsByOrganization;
 using Vention.Application.Membership.Queries.GetMembershipsByUser;
+using Vention.Application.Membership.Queries.GetMembershipsByUserIds;
 using Vention.Application.Messaging;
 using Vention.Domain.Membership;
 
@@ -63,6 +64,21 @@ namespace Vention.API.Controllers
                 return Forbid();
 
             var result = await _dispatcher.Send(new GetMembershipsByUserQuery(userId), ct);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<MembershipResponse>>> GetByUserIds(
+            [FromQuery] Guid[] userIds,
+            CancellationToken ct)
+        {
+            if (userIds is null || userIds.Length == 0)
+                return BadRequest(new { title = "userIds is required" });
+
+            var result = await _dispatcher.Send(
+                new GetMembershipsByUserIdsQuery(userIds, _currentUser.UserId),
+                ct);
 
             return Ok(result);
         }

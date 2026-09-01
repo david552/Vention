@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
@@ -18,6 +13,23 @@ namespace Vention.Infrastructure.Persistence.Repositories
         public Task<Membership?> GetByIdAsync(MembershipId id, CancellationToken ct)
             => _context.Memberships.FirstOrDefaultAsync(m => m.Id == id, ct);
 
+        public async Task<IReadOnlyList<Membership>> GetByUserIdsAsync(
+            IReadOnlyCollection<UserId> userIds,
+            UserId actingUserId,
+            CancellationToken ct)
+        {
+            if (userIds.Count == 0)
+                return Array.Empty<Membership>();
+
+            return await _context.Memberships
+                .AsNoTracking()
+                .Where(m =>
+                    userIds.Contains(m.UserId) &&
+                    _context.Memberships.Any(mine =>
+                        mine.UserId == actingUserId &&
+                        mine.OrganizationId == m.OrganizationId))
+                .ToListAsync(ct);
+        }
         public Task<Membership?> GetByUserAndOrganizationAsync(UserId userId, OrganizationId organizationId, CancellationToken ct)
             => _context.Memberships.FirstOrDefaultAsync(m => m.UserId == userId && m.OrganizationId == organizationId, ct);
 

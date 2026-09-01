@@ -35,17 +35,22 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<UserResponse>> GetById(Guid id, CancellationToken ct)
+        public async Task<ActionResult<UserResponse>> GetById(
+            Guid id,
+            [FromQuery] bool includeOrganisations = true,
+            CancellationToken ct = default)
         {
-            var result = await _dispatcher.Send(new GetUserByIdQuery(id, _currentUser.UserId), ct);
+            var result = await _dispatcher.Send(new GetUserByIdQuery(id, _currentUser.UserId, includeOrganisations), ct);
 
             return Ok(result);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<UserResponse>>> GetAll(CancellationToken ct)
+        public async Task<ActionResult<IReadOnlyList<UserResponse>>> GetAll(
+            [FromQuery] bool includeOrganisations = true,
+            CancellationToken ct = default)
         {
-            var result = await _dispatcher.Send(new GetUsersQuery(_currentUser.UserId), ct);
+            var result = await _dispatcher.Send(new GetUsersQuery(_currentUser.UserId, includeOrganisations), ct);
 
             return Ok(result);
         }
