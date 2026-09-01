@@ -48,6 +48,27 @@ namespace Vention.Infrastructure.Persistence.Repositories
             return rows.Select(r => (r.Session, r.Sequence)).ToList();
         }
 
+        public async Task<IReadOnlyList<ChatSession>> GetSessionsForUserAsync(
+            UserId userId,
+            OrganizationId organizationId,
+            CancellationToken ct)
+        {
+            return await _context.ChatSessions
+                .AsNoTracking()
+                .Where(cs => cs.OrganizationId == organizationId)
+                .Where(cs => _context.ChatSessionMembers
+                .Any(m => m.ChatSessionId == cs.Id && m.UserId == userId))
+                .OrderByDescending(cs => cs.UpdatedAt)
+                .ThenByDescending(cs => EF.Property<long>(cs, "Sequence"))
+                .ToListAsync(ct);
+        }
+
+        public Task<ChatSessionMember?> GetMembershipAsync(
+            ChatSessionId sessionId,
+            UserId userId,
+            CancellationToken ct)
+            => _context.ChatSessionMembers
+            .FirstOrDefaultAsync(m => m.ChatSessionId == sessionId && m.UserId == userId, ct);
 
         public Task<ChatSession?> FindDirectSessionAsync(
            UserId userA,
@@ -55,14 +76,13 @@ namespace Vention.Infrastructure.Persistence.Repositories
            OrganizationId organizationId,
            CancellationToken ct)
         {
-            var key = DirectChatKey.Create(userA, userB).Value;
+            var directChatKey = DirectChatKey.Create(userA, userB);
 
             return _context.ChatSessions
                 .AsNoTracking()
                 .FirstOrDefaultAsync(
                     cs => cs.OrganizationId == organizationId
-                       && cs.DirectChatKey != null
-                       && cs.DirectChatKey.Value == key,
+                       && cs.DirectChatKey == directChatKey,
                     ct);
         }
 

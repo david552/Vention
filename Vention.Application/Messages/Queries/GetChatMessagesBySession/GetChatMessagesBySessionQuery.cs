@@ -7,6 +7,7 @@ namespace Vention.Application.Messages.Queries.GetChatMessagesBySession
     public sealed record GetChatMessagesBySessionQuery(
         Guid SessionId,
         Guid RequestingUserId,
-        string? Cursor,
-        int PageSize = 50) : IQuery<CursorPage<ChatMessageResponse>>;
+        bool Paginated = false,
+        string? Cursor = null,
+        int PageSize = 50) : IQuery<ListResult<ChatMessageResponse>>;
 }

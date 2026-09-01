@@ -1,13 +1,14 @@
 services:
-  api:
-    container_name: vention-api
+  api-1:
     user: "0:0"
     build:
       context: .
       dockerfile: Vention.API/Dockerfile
+    hostname: api-1
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - INSTANCE_NAME=api-1
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
       - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
@@ -33,34 +34,75 @@ services:
         condition: service_healthy
       vention-rabbitmq:
         condition: service_healthy
-  graphql:
-    container_name: vention-graphql
+    restart: unless-stopped
+
+  api-2:
     user: "0:0"
     build:
       context: .
-      dockerfile: Vention.GraphQL/Dockerfile
+      dockerfile: Vention.API/Dockerfile
+    hostname: api-2
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - INSTANCE_NAME=api-2
+      - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__Redis=vention-redis:6379
+      - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
+      - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__AccessTokenMinutes=${JWT_EXPIRATION_MINUTES}
+      - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
       - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
       - Gateway__UserIdHeaderName=X-User-Id
       - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
-      - RestApi__BaseAddress=http://api:8080/
+    volumes:
+      - file-storage-data:/app/Storage
     networks:
       - vention-network
     depends_on:
-      api:
-        condition: service_started
+      vention-postgres:
+        condition: service_healthy
+      vention-redis:
+        condition: service_healthy
+      vention-rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
 
-  processor:
-    # container_name: vention-processor
+  graphql:
+    build:
+      context: .
+      dockerfile: Vention.GraphQL/Dockerfile
+    hostname: graphql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - RestApi__BaseAddress=http://api-1:8080/
+      - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
+      - Gateway__UserIdHeaderName=X-User-Id
+      - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
+    networks:
+      - vention-network
+    depends_on:
+      api-1:
+        condition: service_started
+    restart: unless-stopped
+
+  processor-1:
     user: "0:0"
     build:
       context: .
       dockerfile: Vention.Processor/Dockerfile
+    hostname: processor-1
     environment:
       - DOTNET_ENVIRONMENT=Development
+      - INSTANCE_NAME=processor-1
       - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
@@ -72,12 +114,43 @@ services:
     depends_on:
       vention-postgres:
         condition: service_healthy
+      vention-redis:
+        condition: service_healthy
       vention-rabbitmq:
         condition: service_healthy
-      api:
+      api-1:
         condition: service_started
-    deploy:
-      replicas: 2
+    restart: unless-stopped
+
+  processor-2:
+    user: "0:0"
+    build:
+      context: .
+      dockerfile: Vention.Processor/Dockerfile
+    hostname: processor-2
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - INSTANCE_NAME=processor-2
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__Redis=vention-redis:6379
+      - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
+      - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
+      - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+    volumes:
+      - file-storage-data:/app/Storage
+    networks:
+      - vention-network
+    depends_on:
+      vention-postgres:
+        condition: service_healthy
+      vention-redis:
+        condition: service_healthy
+      vention-rabbitmq:
+        condition: service_healthy
+      api-1:
+        condition: service_started
+    restart: unless-stopped
 
   api-gateway:
     container_name: vention-api-gateway
@@ -93,13 +166,16 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
-      - ReverseProxy__Clusters__mainApi__Destinations__destination1__Address=http://api:8080/
+      - ReverseProxy__Clusters__mainApi__Destinations__destination1__Address=http://api-1:8080/
+      - ReverseProxy__Clusters__mainApi__Destinations__destination2__Address=http://api-2:8080/
       - ReverseProxy__Clusters__graphqlApi__Destinations__destination1__Address=http://graphql:8080/
     networks:
       - vention-network
     depends_on:
-      - api
+      - api-1
+      - api-2
       - graphql
+    restart: unless-stopped
 
   vention-postgres:
     container_name: vention-postgres
@@ -119,6 +195,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   vention-redis:
     container_name: vention-redis
@@ -134,6 +211,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   vention-rabbitmq:
     container_name: vention-rabbitmq
@@ -153,13 +231,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
   postgres-data:
   redis-data:
   rabbitmq-data:
   file-storage-data:
-
 
 networks:
   vention-network:

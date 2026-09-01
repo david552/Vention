@@ -8,6 +8,7 @@ namespace Vention.Application.Messages.Queries.GetChatMessagesBySession
         public GetChatMessagesBySessionQueryValidator()
         {
             RuleFor(x => x.SessionId).NotEmpty();
+            RuleFor(x => x.RequestingUserId).NotEmpty();
             RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
         }
     }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System.Reflection;
 using Vention.Application.Abstractions;
 using Vention.Domain.Chats;
@@ -13,6 +14,7 @@ using Vention.Domain.Users;
 using Vention.Infrastructure.Messaging;
 using Vention.Infrastructure.Persistence;
 using Vention.Infrastructure.Persistence.Repositories;
+using Vention.Infrastructure.Services;
 
 namespace Vention.Infrastructure
 {
@@ -27,7 +29,7 @@ namespace Vention.Infrastructure
             services.AddDbContext<VentionDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("PostgresConnection"))
                 .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine, LogLevel.Information));
+                .LogTo(Console.WriteLine, LogLevel.Warning));
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -42,8 +44,13 @@ namespace Vention.Infrastructure
             services.AddScoped<IStoredFileRepository, StoredFileRepository>();
             services.AddScoped<IIntegrationEventPublisher, MassTransitIntegrationEventPublisher>();
 
-
             services.AddMassTransitMessaging(massTransitHost, consumerAssembly);
+
+            var redisConnection = configuration.GetConnectionString("Redis")
+                ?? throw new InvalidOperationException("Redis connection string is not configured.");
+
+            services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection));
+            services.AddSingleton<IPresenceTracker, RedisPresenceTracker>();
 
 
             return services;

@@ -1,24 +1,29 @@
-﻿using Mapster;
-using Vention.Application.Authorization;
+﻿using Vention.Application.Authorization;
 using Vention.Application.Chats.Contracts;
+using Vention.Application.Chats.Services;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Domain.Chats;
+using Vention.Domain.Users;
 
 namespace Vention.Application.Chats.Queries.GetChatSessionById
 {
+
     public sealed class GetChatSessionByIdQueryHandler : IQueryHandler<GetChatSessionByIdQuery, ChatSessionResponse>
     {
         private readonly IChatSessionRepository _chatSessionRepository;
         private readonly ChatAuthorizationService _chatAuth;
+        private readonly ChatSessionResponseMapper _mapper;
 
         public GetChatSessionByIdQueryHandler(
             IChatSessionRepository chatSessionRepository,
-            ChatAuthorizationService chatAuth)
+            ChatAuthorizationService chatAuth,
+            ChatSessionResponseMapper mapper)
         {
             _chatSessionRepository = chatSessionRepository;
             _chatAuth = chatAuth;
-        } 
+            _mapper = mapper;
+        }
 
         public async Task<ChatSessionResponse> Handle(GetChatSessionByIdQuery query, CancellationToken ct)
         {
@@ -27,7 +32,7 @@ namespace Vention.Application.Chats.Queries.GetChatSessionById
             var chatSession = await _chatSessionRepository.GetByIdAsync(new ChatSessionId(query.Id), ct)
                 ?? throw new NotFoundException($"Chat session '{query.Id}' was not found.");
 
-            return chatSession.Adapt<ChatSessionResponse>();
+            return await _mapper.MapAsync(chatSession, new UserId(query.RequestingUserId), ct);
         }
     }
 }
