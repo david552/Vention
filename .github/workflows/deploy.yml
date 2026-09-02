@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+   # branches: [main, master]
+   branches: [ '**' ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          # cache: true
+      - run: dotnet restore Vention.sln
+      - run: dotnet build Vention.sln --configuration Release --no-restore
+      - run: dotnet test Vention.sln --configuration Release --no-build --verbosity normal
+
+  verify-docker-build:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build all Docker images using Compose
+        run: docker compose build

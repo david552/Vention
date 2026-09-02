@@ -22,9 +22,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
 		.env = .env
+		.env.example = .env.example
 		.gitignore = .gitignore
 		compose.yml = compose.yml
+		Directory.Build.props = Directory.Build.props
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -45,6 +48,22 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vention.Presentation.Common", "Vention.Presentation.Common\Vention.Presentation.Common.csproj", "{0DE51411-FD30-4C14-89C8-7AD977462E45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vention.GraphQL", "Vention.GraphQL\Vention.GraphQL.csproj", "{4D68E4CB-2277-48D4-A92C-702A03975407}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{7DC0AC2B-29FD-4690-B30A-B63F1FF033B6}"
+	ProjectSection(SolutionItems) = preProject
+		nginx\nginx.conf = nginx\nginx.conf
+		nginx\proxy.conf = nginx\proxy.conf
+		nginx\ssl\vention.crt = nginx\ssl\vention.crt
+		nginx\ssl\vention.key = nginx\ssl\vention.key
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{21C2F1C8-73FA-49AF-91CB-64D822651702}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{F12A56A2-2304-427A-84B2-ABB1A8B81A9B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		deploy.yml = deploy.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +139,7 @@ Global
 		{1F372A2A-DA3C-4804-8C6A-62A90A071132} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0DE51411-FD30-4C14-89C8-7AD977462E45} = {6895AC18-994E-4B88-AA57-6FCAE899CDE9}
 		{4D68E4CB-2277-48D4-A92C-702A03975407} = {6895AC18-994E-4B88-AA57-6FCAE899CDE9}
+		{F12A56A2-2304-427A-84B2-ABB1A8B81A9B} = {21C2F1C8-73FA-49AF-91CB-64D822651702}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C701A050-877A-4117-804A-EED0D713B8AA}
