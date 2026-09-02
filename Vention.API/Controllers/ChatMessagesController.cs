@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Vention.Application.Abstractions;
 using Vention.Application.Common;
-using Vention.Application.Messages.Commands.DeleteChatMessage;
 using Vention.Application.Messages.Commands.SendChatMessage;
 using Vention.Application.Messages.Contracts;
-using Vention.Application.Messages.Queries.GetChatMessageById;
 using Vention.Application.Messages.Queries.GetChatMessagesBySession;
 using Vention.Application.Messaging;
 
@@ -29,47 +27,42 @@ namespace Vention.API.Controllers
             [FromBody] SendChatMessageRequest request,
             CancellationToken ct)
         {
-            var command = new SendChatMessageCommand(sessionId, _currentUser.UserId, request.Content);
+            var content = !string.IsNullOrWhiteSpace(request.Content)
+                ? request.Content
+                : request.Question;
+
+            if (string.IsNullOrWhiteSpace(content))
+                return BadRequest(new { message = "content or question is required." });
+
+            var command = new SendChatMessageCommand(sessionId, _currentUser.UserId, content);
 
             var result = await _dispatcher.Send(command, ct);
 
-            return CreatedAtAction(nameof(GetById), new { sessionId, id = result.Id }, result);
+            return Ok(result);
         }
 
         [HttpGet]
-        public async Task<ActionResult<CursorPage<ChatMessageResponse>>> GetBySession(
+        public async Task<IActionResult> GetBySession(
             Guid sessionId,
+            [FromQuery] bool paginated = false,
+            [FromQuery] bool all = false,
             [FromQuery] string? cursor = null,
             [FromQuery] int pageSize = 50,
             CancellationToken ct = default)
         {
+            var usePagination = paginated && !all;
 
             var result = await _dispatcher.Send(
-                new GetChatMessagesBySessionQuery(sessionId, _currentUser.UserId, cursor, pageSize), ct);
+                new GetChatMessagesBySessionQuery(sessionId, _currentUser.UserId, usePagination, cursor, pageSize), ct);
 
-            return Ok(result);
+            if (result.Paginated)
+                return Ok(new CursorPage<ChatMessageResponse>(result.Items, result.NextCursor));
+
+            return Ok(result.Items);
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ChatMessageResponse>> GetById(
-            Guid sessionId,
-            Guid id,
-            CancellationToken ct)
-        {
-            var result = await _dispatcher.Send(new GetChatMessageByIdQuery(id, _currentUser.UserId), ct);
-            return Ok(result);
-        }
-
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(
-            Guid sessionId,
-            Guid id,
-            CancellationToken ct)
-        {
-            await _dispatcher.Send(new DeleteChatMessageCommand(id, _currentUser.UserId), ct);
-            return NoContent();
-        }
+       
     }
 
-    public sealed record SendChatMessageRequest(string Content);
+    public sealed record SendChatMessageRequest(string? Content, string? Question);
 }

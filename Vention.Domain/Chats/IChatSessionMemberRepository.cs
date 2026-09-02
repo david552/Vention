@@ -15,6 +15,16 @@ namespace Vention.Domain.Chats
             int take,
             CancellationToken ct);
 
+        Task<IReadOnlyList<ChatSession>> GetSessionsForUserAsync(
+            UserId userId,
+            OrganizationId organizationId,
+            CancellationToken ct);
+
+        Task<ChatSessionMember?> GetMembershipAsync(
+            ChatSessionId sessionId,
+            UserId userId,
+            CancellationToken ct);
+
         Task<ChatSession?> FindDirectSessionAsync(
             UserId userA,
             UserId userB,

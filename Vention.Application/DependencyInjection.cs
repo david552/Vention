@@ -3,6 +3,7 @@ using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Vention.Application.Authorization;
+using Vention.Application.Chats.Services;
 using Vention.Application.Messaging;
 using Vention.Application.Users;
 
@@ -17,8 +18,8 @@ namespace Vention.Application
             services.AddScoped<OrganizationAuthorizationService>();
             services.AddScoped<ChatAuthorizationService>();
             services.AddScoped<UserResponseComposer>();
-            services.AddScoped<ActiveOrganizationContextService>(); 
-
+            services.AddScoped<ActiveOrganizationContextService>();
+            services.AddScoped<ChatSessionResponseMapper>();
             var assembly = typeof(DependencyInjection).Assembly;
 
             services.AddValidatorsFromAssembly(assembly);

@@ -1,29 +1,38 @@
-using Mapster;
 using Vention.Application.Chats.Contracts;
+using Vention.Application.Chats.Services;
 using Vention.Application.Common;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Domain.Chats;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
+
 namespace Vention.Application.Chats.Queries.GetSessionsForUser
 {
+
     public sealed class GetSessionsForUserQueryHandler
-       : IQueryHandler<GetSessionsForUserQuery, CursorPage<ChatSessionResponse>>
+        : IQueryHandler<GetChatSessionsForUserQuery, ListResult<ChatSessionResponse>>
     {
         private readonly IChatSessionMemberRepository _memberRepository;
         private readonly IUserRepository _userRepository;
         private readonly IOrganizationRepository _organizationRepository;
+        private readonly ChatSessionResponseMapper _mapper;
+
         public GetSessionsForUserQueryHandler(
             IChatSessionMemberRepository memberRepository,
             IUserRepository userRepository,
-            IOrganizationRepository organizationRepository)
+            IOrganizationRepository organizationRepository,
+            ChatSessionResponseMapper mapper)
         {
             _memberRepository = memberRepository;
             _userRepository = userRepository;
             _organizationRepository = organizationRepository;
+            _mapper = mapper;
         }
-        public async Task<CursorPage<ChatSessionResponse>> Handle(GetSessionsForUserQuery query, CancellationToken ct)
+
+        public async Task<ListResult<ChatSessionResponse>> Handle(
+            GetChatSessionsForUserQuery query,
+            CancellationToken ct)
         {
             var userId = new UserId(query.UserId);
             var organizationId = new OrganizationId(query.OrganizationId);
@@ -33,6 +42,14 @@ namespace Vention.Application.Chats.Queries.GetSessionsForUser
 
             if (!await _organizationRepository.ExistsByIdAsync(organizationId, ct))
                 throw new NotFoundException($"Organization '{query.OrganizationId}' was not found.");
+
+            if (!query.Paginated)
+            {
+                var allSessions = await _memberRepository.GetSessionsForUserAsync(userId, organizationId, ct);
+                var allItems = await _mapper.MapManyAsync(allSessions, userId, ct);
+
+                return new ListResult<ChatSessionResponse>(allItems, NextCursor: null, Paginated: false);
+            }
 
             var pageSize = CursorCodec.NormalizePageSize(query.PageSize);
             DateTimeOffset? cursorUpdatedAt = null;
@@ -63,10 +80,9 @@ namespace Vention.Application.Chats.Queries.GetSessionsForUser
             }
 
             var sessions = rows.Select(r => r.Session).ToList();
+            var items = await _mapper.MapManyAsync(sessions, userId, ct);
 
-            return new CursorPage<ChatSessionResponse>(
-                sessions.Adapt<IReadOnlyList<ChatSessionResponse>>(),
-                nextCursor);
+            return new ListResult<ChatSessionResponse>(items, nextCursor, Paginated: true);
         }
     }
 }

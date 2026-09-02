@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace Vention.Application.Chats.Queries.GetSessionsForUser
 {
-    public sealed class GetSessionsForUserQueryValidator : AbstractValidator<GetSessionsForUserQuery>
+    public sealed class GetChatSessionsForUserQueryValidator : AbstractValidator<GetChatSessionsForUserQuery>
     {
-        public GetSessionsForUserQueryValidator()
+        public GetChatSessionsForUserQueryValidator()
         {
             RuleFor(x => x.UserId).NotEmpty();
             RuleFor(x => x.OrganizationId).NotEmpty();

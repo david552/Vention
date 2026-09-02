@@ -4,9 +4,10 @@ using Vention.Application.Messaging;
 
 namespace Vention.Application.Chats.Queries.GetSessionsForUser
 {
-    public sealed record GetSessionsForUserQuery(
+    public sealed record GetChatSessionsForUserQuery(
           Guid UserId,
           Guid OrganizationId,
-          string? Cursor,
-          int PageSize = 50) : IQuery<CursorPage<ChatSessionResponse>>;
+          bool Paginated = false,
+          string? Cursor = null,
+          int PageSize = 50) : IQuery<ListResult<ChatSessionResponse>>;
 }
