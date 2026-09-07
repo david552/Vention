@@ -1,5 +1,6 @@
 ﻿using ApiGateway.Extensions;
 using ApiGateway.Options;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,10 +16,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 builder.Services.AddGatewayJwtAuthentication(builder.Configuration);
@@ -90,6 +100,8 @@ var app = builder.Build();
 app.UseCorrelationId();
 
 app.UseCors("Frontend");
+
+app.UseForwardedHeaders();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,4 +1,4 @@
-services:
+﻿services:
   api-1:
     user: "0:0"
     build:
@@ -9,6 +9,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - INSTANCE_NAME=api-1
+      - SignalR__Redis__ChannelPrefix=vention-chat
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
       - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
@@ -34,7 +35,6 @@ services:
         condition: service_healthy
       vention-rabbitmq:
         condition: service_healthy
-    restart: unless-stopped
 
   api-2:
     user: "0:0"
@@ -46,6 +46,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - INSTANCE_NAME=api-2
+      - SignalR__Redis__ChannelPrefix=vention-chat
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
       - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
@@ -71,7 +72,6 @@ services:
         condition: service_healthy
       vention-rabbitmq:
         condition: service_healthy
-    restart: unless-stopped
 
   graphql:
     build:
@@ -90,7 +90,6 @@ services:
     depends_on:
       api-1:
         condition: service_started
-    restart: unless-stopped
 
   processor-1:
     user: "0:0"
@@ -120,7 +119,6 @@ services:
         condition: service_healthy
       api-1:
         condition: service_started
-    restart: unless-stopped
 
   processor-2:
     user: "0:0"
@@ -150,7 +148,6 @@ services:
         condition: service_healthy
       api-1:
         condition: service_started
-    restart: unless-stopped
 
   api-gateway:
     container_name: vention-api-gateway
@@ -175,8 +172,23 @@ services:
       - api-1
       - api-2
       - graphql
-    restart: unless-stopped
+  
+  nginx:
+    image: nginx:alpine
+    container_name: vention-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - vention-network
+    depends_on:
+      - api-gateway
 
+  
   vention-postgres:
     container_name: vention-postgres
     image: postgres:16-alpine
@@ -195,7 +207,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
   vention-redis:
     container_name: vention-redis
@@ -211,7 +222,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
   vention-rabbitmq:
     container_name: vention-rabbitmq
@@ -231,7 +241,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
 volumes:
   postgres-data:
