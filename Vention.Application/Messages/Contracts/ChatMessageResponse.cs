@@ -1,9 +1,12 @@
 namespace Vention.Application.Messages.Contracts
 {
+
     public sealed record ChatMessageResponse(
         Guid Id,
-        Guid ChatSessionId,
-        Guid SenderId,
+        Guid ChatId,
         string Content,
-        DateTimeOffset CreatedAt);
+        Guid SenderId,
+        string SenderName,
+        DateTimeOffset CreatedAt,
+        bool IsOwn);
 }

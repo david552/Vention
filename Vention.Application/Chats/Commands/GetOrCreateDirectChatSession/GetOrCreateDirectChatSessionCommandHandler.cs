@@ -1,6 +1,6 @@
-﻿using Mapster;
-using Vention.Application.Abstractions;
+﻿using Vention.Application.Abstractions;
 using Vention.Application.Chats.Contracts;
+using Vention.Application.Chats.Services;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Domain.Chats;
@@ -9,9 +9,9 @@ using Vention.Domain.Organizations;
 using Vention.Domain.Users;
 using System.Data;
 
-
 namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
 {
+
     public sealed class GetOrCreateDirectChatSessionCommandHandler
         : ICommandHandler<GetOrCreateDirectChatSessionCommand, ChatSessionResponse>
     {
@@ -21,6 +21,8 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
         private readonly IOrganizationRepository _organizationRepository;
         private readonly IMembershipRepository _membershipRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationPublisher _notificationPublisher;
+        private readonly ChatSessionResponseMapper _mapper;
 
         public GetOrCreateDirectChatSessionCommandHandler(
             IChatSessionRepository sessionRepository,
@@ -28,7 +30,9 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
             IUserRepository userRepository,
             IOrganizationRepository organizationRepository,
             IMembershipRepository membershipRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            INotificationPublisher notificationPublisher,
+            ChatSessionResponseMapper mapper)
         {
             _sessionRepository = sessionRepository;
             _memberRepository = memberRepository;
@@ -36,6 +40,8 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
             _organizationRepository = organizationRepository;
             _membershipRepository = membershipRepository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _notificationPublisher = notificationPublisher;
         }
 
         public async Task<ChatSessionResponse> Handle(GetOrCreateDirectChatSessionCommand command, CancellationToken ct)
@@ -50,8 +56,8 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
             if (!await _organizationRepository.ExistsByIdAsync(organizationId, ct))
                 throw new NotFoundException($"Organization '{command.OrganizationId}' was not found.");
 
-            var participant = await _userRepository.GetByIdAsync(participantId, ct)
-                ?? throw new NotFoundException($"User '{command.ParticipantUserId}' was not found.");
+            if (await _userRepository.GetByIdAsync(participantId, ct) is null)
+                throw new NotFoundException($"User '{command.ParticipantUserId}' was not found.");
 
             if (!await _userRepository.ExistsByIdAsync(initiatorId, ct))
                 throw new NotFoundException($"User '{command.InitiatorUserId}' was not found.");
@@ -64,20 +70,7 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
 
             var existing = await _memberRepository.FindDirectSessionAsync(initiatorId, participantId, organizationId, ct);
             if (existing is not null)
-                return existing.Adapt<ChatSessionResponse>();
-
-
-            
-            //  SAMPLE — explicit transaction + isolation level
-            // ------------------------------------------------------------
-            // For most handlers in this project stage this is NOT required:
-            // - one SaveChangesAsync already runs in an implicit EF transaction
-            // - unique indexes handle duplicate/concurrency for direct chats
-            //
-            // This block is kept as a deliberate sample of:
-            // - Transaction management (Begin / SaveChanges / Commit / Rollback)
-            // - Isolation levels (explicit ReadCommitted; can switch later)
-            
+                return await _mapper.MapAsync(existing, initiatorId, ct);
 
             var session = ChatSession.CreateDirectChat(organizationId, initiatorId, participantId);
 
@@ -85,31 +78,34 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
             _memberRepository.Add(ChatSessionMember.Create(session.Id, initiatorId));
             _memberRepository.Add(ChatSessionMember.Create(session.Id, participantId));
 
-            // 4.3: PostgreSQL default is ReadCommitted; we set it explicitly for clarity.
-            // Use RepeatableRead/Serializable only when a use case needs stronger guarantees
-            // than unique constraints + retry (not required for current chat flows).
             await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
 
             try
             {
-                // all pending inserts commit together in this explicit transaction
-
                 await _unitOfWork.SaveChangesAsync(ct);
-
                 await _unitOfWork.CommitTransactionAsync(ct);
-                return session.Adapt<ChatSessionResponse>();
+
+                var responseForInitiator = await _mapper.MapAsync(session, initiatorId, ct);
+
+                var responseForParticipant = await _mapper.MapAsync(session, participantId, ct);
+
+                await _notificationPublisher.NotifyChatSessionCreatedAsync(
+                    participantId.Value,
+                    responseForParticipant,
+                    ct);
+
+                return responseForInitiator;
             }
-            catch (Exception ex)
+            catch
             {
                 await _unitOfWork.RollbackTransactionAsync(ct);
 
-                // Unique index lost the race → return the row the other request created
                 var raced = await _memberRepository.FindDirectSessionAsync(
                     initiatorId, participantId, organizationId, ct)
                     ?? throw new InvalidOperationException(
-                       "Failed to create or find direct chat session after a concurrency conflict.");
+                        "Failed to create or find direct chat session after a concurrency conflict.");
 
-                return raced.Adapt<ChatSessionResponse>();
+                return await _mapper.MapAsync(raced, initiatorId, ct);
             }
         }
     }

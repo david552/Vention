@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using StackExchange.Redis;
 using Vention.API.Hubs;
+using Vention.API.Providers;
 using Vention.API.Services;
 using Vention.Application.Abstractions;
 using Vention.Application.Options;
@@ -14,7 +15,7 @@ namespace Vention.API.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            var redisConnection = configuration.GetConnectionString("redis")
+            var redisConnection = configuration.GetConnectionString("Redis")
                 ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");
 
             var channelPrefix = configuration
@@ -26,6 +27,7 @@ namespace Vention.API.Extensions
             {
                 options.KeepAliveInterval = TimeSpan.FromSeconds(15);
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                options.MaximumParallelInvocationsPerClient = 1;
             })
             .AddStackExchangeRedis(redisConnection, options =>
             {
@@ -36,14 +38,16 @@ namespace Vention.API.Extensions
             });
 
             services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
-
+            services.AddSingleton<IUserIdProvider, HeaderUserIdProvider>();
             return services;
         }
 
         public static WebApplication MapVentionHubs(this WebApplication app)
         {
-            app.MapHub<NotificationHub>(NotificationHub.Route);
-
+            app.MapHub<NotificationHub>(NotificationHub.Route, options =>
+            {
+                options.AllowStatefulReconnects = true;
+            });
             return app;
         }
     }

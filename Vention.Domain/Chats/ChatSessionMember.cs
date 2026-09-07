@@ -8,6 +8,8 @@ namespace Vention.Domain.Chats
         public ChatSessionId ChatSessionId { get; private set; }
         public UserId UserId { get; private set; }
         public DateTimeOffset JoinedAt { get; private set; }
+        public DateTimeOffset? LastReadAt { get; private set; }
+
 
         private ChatSessionMember() { }
 
@@ -30,6 +32,11 @@ namespace Vention.Domain.Chats
                 throw new ArgumentException("UserId cannot be empty.", nameof(userId));
 
             return new ChatSessionMember(new ChatSessionMemberId(Guid.NewGuid()), chatSessionId, userId);
+        }
+        public void MarkAsRead(DateTimeOffset readAt)
+        {
+            if (LastReadAt is null || readAt > LastReadAt)
+                LastReadAt = readAt;
         }
     }
 

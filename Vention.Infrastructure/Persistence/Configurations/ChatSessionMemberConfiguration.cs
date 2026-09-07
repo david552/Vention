@@ -33,6 +33,11 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .HasColumnType("timestamptz")
                 .IsRequired();
 
+            builder.Property(m => m.LastReadAt)
+                .HasColumnName("last_read_at")
+                .HasColumnType("timestamptz")
+                .IsRequired(false);
+ 
             builder.HasOne<ChatSession>()
                 .WithMany()
                 .HasForeignKey(m => m.ChatSessionId)
