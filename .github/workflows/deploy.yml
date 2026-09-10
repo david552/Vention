@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-          cache: true
+          # cache: true
       - run: dotnet restore Vention.sln
       - run: dotnet build Vention.sln --configuration Release --no-restore
       - run: dotnet test Vention.sln --configuration Release --no-build --verbosity normal
