@@ -68,9 +68,10 @@ namespace Vention.Application.Messages.Commands.SendChatMessage
 
             await _notificationPublisher.NotifyUserMessageAsync(
                 recipient.UserId.Value,
+                session.OrganizationId.Value,  
                 session.Id.Value,
                 message.Id.Value,
-                message.SenderId.Value,  
+                message.SenderId.Value,
                 message.Content,
                 message.CreatedAt,
                 ct);

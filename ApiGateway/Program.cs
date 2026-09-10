@@ -1,9 +1,18 @@
-﻿using ApiGateway.Extensions;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
+using ApiGateway.Extensions;
 using ApiGateway.Options;
+
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Enrichers.Span;
+using Serilog.Formatting.Compact;
 using Vention.Observability;
 using Vention.Observability.Extensions;
 using Yarp.ReverseProxy.Transforms;
@@ -12,6 +21,45 @@ using Yarp.ReverseProxy.Transforms;
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithSpan()  
+    .WriteTo.Console(new CompactJsonFormatter()));
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(
+            serviceName: "Vention.ApiGateway",
+            serviceVersion: "1.0.0",
+            serviceInstanceId: Environment.MachineName))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation(options =>
+        {
+            options.RecordException = true;
+            options.EnrichWithHttpRequest = (activity, httpRequest) =>
+            {
+                activity.SetTag("http.request.header.user-agent", httpRequest.Headers.UserAgent.ToString());
+            };
+            options.EnrichWithHttpResponse = (activity, httpResponse) =>
+            {
+                activity.SetTag("http.response.status_code", httpResponse.StatusCode);
+            };
+        })
+        .AddHttpClientInstrumentation(options =>
+        {
+            options.RecordException = true;
+        }))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddPrometheusExporter());
+
+
+
 
 builder.Services.AddCors(options =>
 {
@@ -98,6 +146,18 @@ builder.Services
 var app = builder.Build();
 
 app.UseCorrelationId();
+
+app.UseSerilogRequestLogging(options =>
+{
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+    };
+});
+
+app.MapPrometheusScrapingEndpoint().AllowAnonymous();
 
 app.UseCors("Frontend");
 

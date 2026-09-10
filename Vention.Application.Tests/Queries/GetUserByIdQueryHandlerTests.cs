@@ -88,7 +88,7 @@ namespace Vention.Application.Tests.Queries
 
             return new GetUserByIdQueryHandler(
                 _userRepository.Object,
-                new UserAuthorizationService(_membershipRepository.Object),
+                new UserAuthorizationService(_membershipRepository.Object, _userRepository.Object),
                 composer);
         }
     }

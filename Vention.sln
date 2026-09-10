@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		compose.yml = compose.yml
 		Directory.Build.props = Directory.Build.props
+		prometheus.yml = prometheus.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -64,6 +65,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		deploy.yml = deploy.yml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grafana", "grafana", "{504D8EEB-9248-46FF-9529-D638C622722E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{120C3A1F-2AA7-4748-8A70-CB53C00506D6}"
+	ProjectSection(SolutionItems) = preProject
+		grafana\provisioning\dashboards\dashboard-provider.yml = grafana\provisioning\dashboards\dashboard-provider.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datasources", "datasources", "{AB104850-D56D-41B0-AD4E-9931C08B2CBA}"
+	ProjectSection(SolutionItems) = preProject
+		grafana\provisioning\datasources\datasource-prometheus.yaml = grafana\provisioning\datasources\datasource-prometheus.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "provisioning", "provisioning", "{6F8702F4-B316-4231-8EA1-7B0DBD23E8D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,6 +155,9 @@ Global
 		{0DE51411-FD30-4C14-89C8-7AD977462E45} = {6895AC18-994E-4B88-AA57-6FCAE899CDE9}
 		{4D68E4CB-2277-48D4-A92C-702A03975407} = {6895AC18-994E-4B88-AA57-6FCAE899CDE9}
 		{F12A56A2-2304-427A-84B2-ABB1A8B81A9B} = {21C2F1C8-73FA-49AF-91CB-64D822651702}
+		{120C3A1F-2AA7-4748-8A70-CB53C00506D6} = {6F8702F4-B316-4231-8EA1-7B0DBD23E8D2}
+		{AB104850-D56D-41B0-AD4E-9931C08B2CBA} = {6F8702F4-B316-4231-8EA1-7B0DBD23E8D2}
+		{6F8702F4-B316-4231-8EA1-7B0DBD23E8D2} = {504D8EEB-9248-46FF-9529-D638C622722E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C701A050-877A-4117-804A-EED0D713B8AA}

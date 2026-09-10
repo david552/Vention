@@ -31,7 +31,7 @@ namespace Vention.API.Extensions
                         factory: _ => new FixedWindowRateLimiterOptions
                         {
                             Window = TimeSpan.FromMinutes(1),
-                            PermitLimit = 30,
+                            PermitLimit = 10,
                             QueueLimit = 0,
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst
                         }));

@@ -2,6 +2,7 @@
 using Vention.Application.Abstractions;
 using Vention.Application.Tests.Users.Common;
 using Vention.Application.Users.Commands.CreateUser;
+using Vention.Domain.Membership;
 using Vention.Domain.Users;
 
 namespace Vention.Application.Tests.Users.Commands
@@ -12,6 +13,7 @@ namespace Vention.Application.Tests.Users.Commands
         private readonly Mock<IUserRepository> _userRepository = new();
         private readonly Mock<IUnitOfWork> _unitOfWork = new();
         private readonly Mock<IPasswordHasher> _passwordHasher = new();
+        private readonly Mock<IMembershipRepository> _membershipRepository = new();
 
         public CreateUserCommandHandlerTests()
         {
@@ -42,10 +44,11 @@ namespace Vention.Application.Tests.Users.Commands
             var handler = new CreateUserCommandHandler(
                 _userRepository.Object,
                 _unitOfWork.Object,
-                _passwordHasher.Object);
+                _passwordHasher.Object,
+                _membershipRepository.Object);
 
             var result = await handler.Handle(
-                new CreateUserCommand("new.user@example.com", "New User", "Password123!"),
+                new CreateUserCommand("new.user@example.com", "New User", "Password123!", Guid.NewGuid()),
                 CancellationToken.None);
 
             Assert.NotNull(addedUser);
@@ -68,17 +71,19 @@ namespace Vention.Application.Tests.Users.Commands
             var handler = new CreateUserCommandHandler(
                 _userRepository.Object,
                 _unitOfWork.Object,
-                _passwordHasher.Object);
+                _passwordHasher.Object,
+                _membershipRepository.Object);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                handler.Handle(
-                    new CreateUserCommand("existing@example.com", "Existing User", "Password123!"),
-                    CancellationToken.None));
+            handler.Handle(
+                new CreateUserCommand("existing@example.com", "Existing User", "Password123!", Guid.NewGuid()),         CancellationToken.None));
 
             Assert.Contains("existing@example.com", exception.Message);
 
             _userRepository.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
             _unitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
+
+
     }
 }

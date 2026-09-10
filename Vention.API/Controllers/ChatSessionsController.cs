@@ -36,6 +36,9 @@ namespace Vention.API.Controllers
 
         }
         [HttpPost]
+        [RequireOrgRoleFromHeader(
+            MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Editor,
+            MembershipRole.Member)]
         public async Task<ActionResult<ChatSessionResponse>> Create(
            CreateChatSessionRequest request,
            CancellationToken ct)
@@ -69,7 +72,7 @@ namespace Vention.API.Controllers
 
 
         [HttpGet]
-        [RequireActiveOrganizationRole(
+        [RequireOrgRoleFromHeader(
             MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Editor,
             MembershipRole.Member, MembershipRole.Viewer)]
         public async Task<IActionResult> GetForActiveOrganization(
@@ -93,6 +96,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpPost("{id:guid}/read")]
+        [RequireOrgRoleFromHeader]
         public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
         {
             await _dispatcher.Send(
@@ -104,6 +108,8 @@ namespace Vention.API.Controllers
 
         [HttpPut("{id:guid}")]
         [HttpPatch("{id:guid}")]
+        [RequireOrgRoleFromHeader(
+            MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Editor, MembershipRole.Member)]
         public async Task<ActionResult<ChatSessionResponse>> Rename(
             Guid id,
             [FromBody] RenameChatSessionRequest request,
@@ -114,6 +120,8 @@ namespace Vention.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [RequireOrgRoleFromHeader(
+            MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Editor, MembershipRole.Member)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             await _dispatcher.Send(new DeleteChatSessionCommand(id, _currentUser.UserId), ct);

@@ -35,7 +35,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet]
-        [RequireActiveOrganizationRole]
+        [RequireOrgRoleFromHeader]
         public async Task<ActionResult<IReadOnlyList<FileResponse>>> GetAll(
             [FromQuery] int limit = DefaultLimit,
             CancellationToken ct = default)
@@ -47,7 +47,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpPost("upload")]
-        [RequireActiveOrganizationRole(
+        [RequireOrgRoleFromHeader(
             MembershipRole.Owner,
             MembershipRole.Admin,
             MembershipRole.Editor,
@@ -78,7 +78,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpPost("upload/stream")]
-        [RequireActiveOrganizationRole(
+        [RequireOrgRoleFromHeader(
             MembershipRole.Owner,
             MembershipRole.Admin,
             MembershipRole.Editor,
@@ -142,7 +142,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpPost("{id:guid}/process")]
-        [RequireActiveOrganizationRole(
+        [RequireOrgRoleFromHeader(
            MembershipRole.Owner,
            MembershipRole.Admin,
            MembershipRole.Editor,
@@ -160,7 +160,7 @@ namespace Vention.API.Controllers
 
 
         [HttpDelete("{id:guid}")]
-        [RequireActiveOrganizationRole(
+        [RequireOrgRoleFromHeader(
             MembershipRole.Owner,
             MembershipRole.Admin,
             MembershipRole.Editor,

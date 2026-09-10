@@ -25,7 +25,7 @@ namespace Vention.API.Consumers
             var ct = context.CancellationToken;
 
             _logger.LogInformation(
-                "FileStatusChanged received. FileId={FileId}, Status={Status}, OwnerId={OwnerId}",
+                "FileStatusChanged received. FileId={message.FileId}, Status={message.Status}, OwnerId={message.OwnerId}",
                 message.FileId, message.Status, message.OwnerId);
 
             switch (message.Status)

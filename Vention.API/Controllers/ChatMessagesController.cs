@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+
+using Vention.API.Authorization;
 using Vention.Application.Abstractions;
 using Vention.Application.Common;
 using Vention.Application.Messages.Commands.SendChatMessage;
 using Vention.Application.Messages.Contracts;
 using Vention.Application.Messages.Queries.GetChatMessagesBySession;
 using Vention.Application.Messaging;
+using Vention.Domain.Membership;
 
 namespace Vention.API.Controllers
 {
@@ -22,6 +25,8 @@ namespace Vention.API.Controllers
         }
 
         [HttpPost]
+        [RequireOrgRoleFromHeader(
+            MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Editor, MembershipRole.Member)]
         public async Task<ActionResult<ChatMessageResponse>> Send(
             Guid sessionId,
             [FromBody] SendChatMessageRequest request,
@@ -42,6 +47,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet]
+        [RequireOrgRoleFromHeader]
         public async Task<IActionResult> GetBySession(
             Guid sessionId,
             [FromQuery] bool paginated = false,

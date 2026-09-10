@@ -47,7 +47,12 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet("by-organization/{organizationId:guid}")]
-        [RequireOrganizationRole("organizationId", MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Member)]
+        [RequireOrgRoleFromRoute("organizationId",
+            MembershipRole.Owner,
+            MembershipRole.Admin,
+            MembershipRole.Editor,
+            MembershipRole.Member,
+            MembershipRole.Viewer)]
         public async Task<ActionResult<IReadOnlyList<MembershipResponse>>> GetByOrganization(Guid organizationId, CancellationToken ct)
         {
             var result = await _dispatcher.Send(new GetMembershipsByOrganizationQuery(organizationId), ct);

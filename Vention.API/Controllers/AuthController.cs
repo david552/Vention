@@ -35,7 +35,7 @@ namespace Vention.API.Controllers
           CancellationToken ct)
         {
             var result = await _dispatcher.Send(
-                new CreateUserCommand(request.Email, request.Name, request.Password), ct);
+                new CreateUserCommand(request.Email, request.Name, request.Password, null), ct);
             return StatusCode(StatusCodes.Status201Created, result);
         }
     }

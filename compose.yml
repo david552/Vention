@@ -242,11 +242,61 @@
       timeout: 5s
       retries: 5
 
+  prometheus:
+    container_name: vention-prometheus
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    environment:
+      - TZ=Asia/Tbilisi    
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - vention-network
+    depends_on:
+      - api-1
+      - api-2
+      - graphql
+      - api-gateway
+      - processor-1
+      - processor-2
+    restart: unless-stopped
+
+  grafana:
+    container_name: vention-grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=
+      - TZ=Asia/Tbilisi
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - vention-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+  
+
 volumes:
   postgres-data:
   redis-data:
   rabbitmq-data:
   file-storage-data:
+  prometheus-data:
+  grafana-data:  
 
 networks:
   vention-network:

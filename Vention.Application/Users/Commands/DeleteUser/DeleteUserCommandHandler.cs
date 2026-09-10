@@ -31,6 +31,7 @@ namespace Vention.Application.Users.Commands.DeleteUser
         {
             await _authService.EnsureCanManageUserAsync(command.Id, command.ActingUserId, ct);
 
+
             var user = await _userRepository.GetByIdAsync(new UserId(command.Id), ct)
                 ?? throw new NotFoundException($"User '{command.Id}' was not found.");
 

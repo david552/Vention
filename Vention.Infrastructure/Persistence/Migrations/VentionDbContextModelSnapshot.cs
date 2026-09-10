@@ -480,6 +480,10 @@ namespace Vention.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("deleted_at");
@@ -513,6 +517,8 @@ namespace Vention.Infrastructure.Persistence.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.ToTable("users", (string)null);
                 });
@@ -606,6 +612,11 @@ namespace Vention.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Vention.Domain.Users.User", b =>
                 {
+                    b.HasOne("Vention.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.OwnsOne("Vention.Domain.Users.Email", "Email", b1 =>
                         {
                             b1.Property<Guid>("UserId")

@@ -146,6 +146,6 @@ namespace Vention.Application.Tests.Users.Commands
                 _userRepository.Object,
                 _unitOfWork.Object,
                 _membershipRepository.Object,
-                new UserAuthorizationService(_membershipRepository.Object));
+                new UserAuthorizationService(_membershipRepository.Object, _userRepository.Object));
     }
 }

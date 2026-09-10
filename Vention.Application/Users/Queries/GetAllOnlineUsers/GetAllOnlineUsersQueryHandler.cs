@@ -69,16 +69,12 @@ namespace Vention.Application.Users.Queries.GetAllOnlineUsers
                     visibleUserIds.Add(orgMember.UserId.Value);
             }
 
-            var isOwnerOrAdminAnywhere = actingMemberships
-                .Any(m => MembershipRoleRules.IsOwnerOrAdmin(m.Role));
+            var orphansCreatedByMe = await _userRepository.GetOrphanUsersCreatedByAsync(
+                new UserId(actingUserId),
+                ct);
 
-            if (isOwnerOrAdminAnywhere)
-            {
-                var orphans = await _userRepository.GetUsersWithNoMembershipsAsync(ct);
-
-                foreach (var orphan in orphans)
-                    visibleUserIds.Add(orphan.Id.Value);
-            }
+            foreach (var orphan in orphansCreatedByMe)
+                visibleUserIds.Add(orphan.Id.Value);
 
             return visibleUserIds;
         }
