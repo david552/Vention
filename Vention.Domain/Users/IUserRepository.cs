@@ -9,7 +9,7 @@
         Task<bool> ExistsByEmailAsync(Email email, CancellationToken ct);
         Task<bool> ExistsByIdAsync(UserId id, CancellationToken ct);
 
-        Task<IReadOnlyList<User>> GetUsersWithNoMembershipsAsync(CancellationToken ct);
+        Task<IReadOnlyList<User>> GetOrphanUsersCreatedByAsync(UserId creatorId, CancellationToken ct);
 
         void Add(User user);
     }

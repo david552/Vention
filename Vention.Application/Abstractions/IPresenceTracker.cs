@@ -6,5 +6,7 @@
         Task<bool> UserDisconnectedAsync(string groupName, string userId, string connectionId);
         Task<IReadOnlyList<string>> GetOnlineUsersAsync(string groupName);
         Task<IReadOnlyList<string>> GetAllOnlineUsersAsync();
+        Task RemoveConnectionAsync(string userId, string connectionId);
+
     }
 }

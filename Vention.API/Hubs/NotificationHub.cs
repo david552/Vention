@@ -67,18 +67,25 @@ namespace Vention.API.Hubs
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.UserIdentifier;
+            var connectionId = Context.ConnectionId;
 
-            if (!string.IsNullOrEmpty(userId) &&
-                Context.Items.TryGetValue("GroupName", out var groupObj) &&
-                groupObj is string groupName)
+            if (!string.IsNullOrEmpty(userId))
             {
-                var isNowOffline = await _presenceTracker.UserDisconnectedAsync(
-                    groupName,
-                    userId,
-                    Context.ConnectionId);
+                if (Context.Items.TryGetValue("GroupName", out var groupObj) &&
+                    groupObj is string groupName)
+                {
+                    var isNowOffline = await _presenceTracker.UserDisconnectedAsync(
+                        groupName,
+                        userId,
+                        connectionId);
 
-                if (isNowOffline)
-                    await Clients.Group(groupName).UserDisconnected(userId);
+                    if (isNowOffline)
+                        await Clients.Group(groupName).UserDisconnected(userId);
+                }
+                else
+                {
+                    await _presenceTracker.RemoveConnectionAsync(userId, connectionId);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);

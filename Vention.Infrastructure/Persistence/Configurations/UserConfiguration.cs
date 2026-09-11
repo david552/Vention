@@ -52,6 +52,19 @@ namespace Vention.Infrastructure.Persistence.Configurations
                 .HasColumnName("password_hash")
                 .IsRequired();
 
+            builder.Property(u => u.CreatedByUserId)
+                .HasColumnName("created_by_user_id")
+                .HasConversion(
+                id => id == null ? (Guid?)null : id.Value,
+                value => value == null ? null : new UserId(value.Value));
+
+            builder.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(u => u.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(u => u.CreatedByUserId);
+
             builder.Property(u => u.CreatedAt)
                 .HasColumnName("created_at")
                 .HasColumnType("timestamptz")

@@ -91,6 +91,7 @@ namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
 
                 await _notificationPublisher.NotifyChatSessionCreatedAsync(
                     participantId.Value,
+                    command.OrganizationId,
                     responseForParticipant,
                     ct);
 

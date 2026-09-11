@@ -1,4 +1,5 @@
 ﻿using Vention.Application.Chats.Contracts;
+using Vention.Domain.Organizations;
 
 namespace Vention.Application.Abstractions
 {
@@ -19,6 +20,7 @@ namespace Vention.Application.Abstractions
 
         Task NotifyUserMessageAsync(
             Guid recipientUserId,
+            Guid organizationId,
             Guid sessionId,
             Guid messageId,
             Guid senderId,
@@ -34,6 +36,7 @@ namespace Vention.Application.Abstractions
 
         Task NotifyChatSessionCreatedAsync(
             Guid recipientUserId,
+            Guid organizationId,
             ChatSessionResponse session,
             CancellationToken cancellationToken = default);
 

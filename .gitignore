@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Docker Secrets
 .env
+
+nginx/ssl/*.key
+nginx/ssl/*.crt

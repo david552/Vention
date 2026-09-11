@@ -41,6 +41,7 @@ namespace Vention.API.Services
 
         public async Task NotifyUserMessageAsync(
             Guid recipientUserId,
+            Guid organizationId,
             Guid sessionId,
             Guid messageId,
             Guid senderId,
@@ -50,6 +51,7 @@ namespace Vention.API.Services
         {
             var notification = new ChatMessageNotification(
                 sessionId,
+                organizationId,
                 new ChatMessageNotificationPayload(messageId, senderId, content, createdAt));
 
             await _hubContext.Clients
@@ -59,11 +61,13 @@ namespace Vention.API.Services
 
         public async Task NotifyChatSessionCreatedAsync(
             Guid recipientUserId,
+            Guid organizationId,
             ChatSessionResponse session,
             CancellationToken cancellationToken = default)
         {
             var notification = new ChatSessionCreatedNotification(
                 session.Id,
+                organizationId,
                 session.Participant,
                 session.LastMessage,
                 session.LastMessageAt,
@@ -84,5 +88,6 @@ namespace Vention.API.Services
                 .Group(OrgGroup(organizationId))
                 .ChatRenamed(new ChatRenamedNotification(sessionId, title));
         }
+
     }
 }

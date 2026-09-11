@@ -7,6 +7,7 @@ namespace Vention.Domain.Users
         public Email Email { get; private set; } = null!;
         public string Name { get; private set; } = null!;
         public string PasswordHash { get; private set; } = null!;
+        public UserId? CreatedByUserId { get; private set; }  
         public DateTimeOffset CreatedAt { get; private set; }
         public DateTimeOffset UpdatedAt { get; private set; }
         public bool IsDeleted { get; private set; }
@@ -16,17 +17,18 @@ namespace Vention.Domain.Users
 
         private User() { } 
 
-        private User(UserId id, Email email, string name, string passwordHash) : base(id)
+        private User(UserId id, Email email, string name, string passwordHash, UserId? createdByUserId) : base(id)
         {
             Email = email;
             Name = name;
             PasswordHash = passwordHash;
+            CreatedByUserId = createdByUserId;
             CreatedAt = DateTimeOffset.UtcNow;
             UpdatedAt = CreatedAt;
             IsDeleted = false;
         }
 
-        public static User Create(Email email, string name, string passwordHash)
+        public static User Create(Email email, string name, string passwordHash, UserId? createdByUserId = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be empty.", nameof(name));
@@ -34,7 +36,7 @@ namespace Vention.Domain.Users
             if (string.IsNullOrWhiteSpace(passwordHash))
                 throw new ArgumentException("Password hash cannot be empty.", nameof(passwordHash));
 
-            return new User(new UserId(Guid.NewGuid()), email, name.Trim(), passwordHash);
+            return new User(new UserId(Guid.NewGuid()), email, name.Trim(), passwordHash, createdByUserId);
         }
 
         public void UpdateProfile(string name)

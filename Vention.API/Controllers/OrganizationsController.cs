@@ -37,7 +37,12 @@ namespace Vention.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        [RequireOrganizationRole("id", MembershipRole.Owner, MembershipRole.Admin, MembershipRole.Member)]
+        [RequireOrgRoleFromRoute("id",
+            MembershipRole.Owner,
+            MembershipRole.Admin,
+            MembershipRole.Editor,
+            MembershipRole.Member,
+            MembershipRole.Viewer)]
         public async Task<ActionResult<OrganizationResponse>> GetById(Guid id, CancellationToken ct)
         {
             var result = await _dispatcher.Send(new GetOrganizationByIdQuery(id), ct);
@@ -64,7 +69,7 @@ namespace Vention.API.Controllers
 
         [HttpPut("{id:guid}")]
         [HttpPatch("{id:guid}")]
-        [RequireOrganizationRole("id", MembershipRole.Owner, MembershipRole.Admin)] 
+        [RequireOrgRoleFromRoute("id", MembershipRole.Owner, MembershipRole.Admin)] 
         public async Task<ActionResult<OrganizationResponse>> Update(Guid id, [FromBody] UpdateOrganizationRequest request, CancellationToken ct)
         {
             var result = await _dispatcher.Send(new UpdateOrganizationCommand(id, request.Name), ct);
@@ -73,7 +78,7 @@ namespace Vention.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        [RequireOrganizationRole("id", MembershipRole.Owner)] 
+        [RequireOrgRoleFromRoute("id", MembershipRole.Owner)] 
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             await _dispatcher.Send(new DeleteOrganizationCommand(id), ct);

@@ -21,6 +21,7 @@ namespace Vention.Application.Abstractions
 
     public sealed record ChatMessageNotification(
         Guid SessionId,
+        Guid OrganizationId,
         ChatMessageNotificationPayload Message);
 
     public sealed record ChatMessageNotificationPayload(
@@ -31,6 +32,7 @@ namespace Vention.Application.Abstractions
 
     public sealed record ChatSessionCreatedNotification(
         Guid SessionId,
+        Guid OrganizationId,
         ChatParticipantResponse Initiator,
         string LastMessage,
         DateTimeOffset LastMessageAt,

@@ -42,11 +42,12 @@ namespace Vention.Infrastructure.Persistence.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IReadOnlyList<User>> GetUsersWithNoMembershipsAsync(CancellationToken ct)
+        public async Task<IReadOnlyList<User>> GetOrphanUsersCreatedByAsync(UserId creatorId, CancellationToken ct)
         {
             return await _context.Users
                 .AsNoTracking()
-                .Where(u => !_context.Memberships.Any(m => m.UserId == u.Id))
+                .Where(u => u.CreatedByUserId == creatorId
+                    && !_context.Memberships.Any(m => m.UserId == u.Id))
                 .ToListAsync(ct);
         }
     }

@@ -29,7 +29,7 @@ namespace Vention.API.Controllers
         public async Task<ActionResult<UserResponse>> Create([FromBody] CreateUserRequest request, CancellationToken ct)
         {
             var result = await _dispatcher.Send(
-                new CreateUserCommand(request.Email, request.DisplayName, request.Password), ct);
+                new CreateUserCommand(request.Email, request.DisplayName, request.Password, _currentUser.UserId), ct);
 
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }

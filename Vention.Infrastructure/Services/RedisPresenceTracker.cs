@@ -24,6 +24,8 @@ namespace Vention.Infrastructure.Services
         {
             var db = _redis.GetDatabase();
             var groupUserKey = GroupUserConnectionsKey(groupName, userId);
+            await db.KeyExpireAsync(GroupOnlineUsersKey(groupName), TimeSpan.FromHours(24));
+
 
             await db.SetAddAsync(groupUserKey, connectionId);
             await db.KeyExpireAsync(groupUserKey, TimeSpan.FromHours(24));
@@ -34,6 +36,8 @@ namespace Vention.Infrastructure.Services
             await db.SetAddAsync(globalUserKey, connectionId);
             await db.KeyExpireAsync(globalUserKey, TimeSpan.FromHours(24));
             await db.SetAddAsync(GlobalOnlineUsersKey, userId);
+            await db.KeyExpireAsync(GlobalOnlineUsersKey, TimeSpan.FromHours(24));
+
 
             return await db.SetLengthAsync(groupUserKey) == 1;
         }
@@ -63,6 +67,20 @@ namespace Vention.Infrastructure.Services
             }
 
             return isOfflineInGroup;
+        }
+
+        public async Task RemoveConnectionAsync(string userId, string connectionId)
+        {
+            var db = _redis.GetDatabase();
+
+            var globalUserKey = GlobalUserConnectionsKey(userId);
+            await db.SetRemoveAsync(globalUserKey, connectionId);
+
+            if (await db.SetLengthAsync(globalUserKey) == 0)
+            {
+                await db.KeyDeleteAsync(globalUserKey);
+                await db.SetRemoveAsync(GlobalOnlineUsersKey, userId);
+            }
         }
 
         public async Task<IReadOnlyList<string>> GetOnlineUsersAsync(string groupName)
@@ -114,5 +132,7 @@ namespace Vention.Infrastructure.Services
 
             return online;
         }
+
+       
     }
 }
