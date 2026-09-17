@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Messaging;
 using Vention.Application.Users.Contracts;
 using Vention.Application.Users.Queries.GetAllOnlineUsers;

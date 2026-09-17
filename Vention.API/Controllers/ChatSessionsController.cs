@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Vention.API.Authorization;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Authorization;
 using Vention.Application.Chats.Commands.DeleteChatSession;
 using Vention.Application.Chats.Commands.GetOrCreateDirectChatSession;

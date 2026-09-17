@@ -1,4 +1,4 @@
-﻿using Vention.Application.Abstractions;
+﻿using Vention.Application.Abstractions.Auth;
 using Vention.Application.Auth.Contracts;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;

@@ -1,6 +1,6 @@
 ﻿using Mapster;
-
 using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Application.Users.Contracts;

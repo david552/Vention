@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Messaging;
 using Vention.Application.Users;
 using Vention.Application.Users.Contracts;

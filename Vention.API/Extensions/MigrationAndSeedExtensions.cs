@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Infrastructure.Persistence;
 using Vention.Infrastructure.Seed;
 

@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Vention.Application.Abstractions;
+
+using Vention.Application.Abstractions.Auth;
 using Vention.Domain.Chats;
 using Vention.Domain.Membership;
 using Vention.Domain.Messages;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Vention.API.Authorization.Policies;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;

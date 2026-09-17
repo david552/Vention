@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+
 using Vention.Application;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Exceptions;
 
 namespace Vention.Presentation.Common.Services

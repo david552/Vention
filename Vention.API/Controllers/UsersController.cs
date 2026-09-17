@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Vention.API.Extensions;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Messaging;
 using Vention.Application.Users.Commands.CreateUser;
 using Vention.Application.Users.Commands.DeleteUser;

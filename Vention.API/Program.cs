@@ -54,6 +54,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()
+        .AddMeter(Vention.Application.Rag.RagMetrics.MeterName)
         .AddPrometheusExporter());
 
 builder.Services.AddProblemDetails();

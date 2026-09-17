@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 using Vention.API.Authorization;
 using Vention.API.Extensions;
 using Vention.API.Filters;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Files;
 using Vention.Application.Files.Commands.DeleteFile;
 using Vention.Application.Files.Commands.ProcessFile;

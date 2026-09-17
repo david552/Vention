@@ -28,24 +28,30 @@ namespace Vention.Infrastructure.Messaging
 
                     x.AddConfigureEndpointsCallback((context, name, cfg) =>
                     {
-                        cfg.PrefetchCount = 16;
-
-                        if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
+                        if (!name.Contains("file-ingestion-requested", StringComparison.OrdinalIgnoreCase))
                         {
-                            rmq.ConcurrentMessageLimit = 8;
+                            cfg.PrefetchCount = 8; 
+
+                            if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
+                            {
+                                rmq.ConcurrentMessageLimit = 4; 
+                            }
                         }
 
                         cfg.UseMessageRetry(r =>
                         {
                             r.Intervals(
-                                TimeSpan.FromMilliseconds(100),
                                 TimeSpan.FromMilliseconds(500),
-                                TimeSpan.FromSeconds(1),
-                                TimeSpan.FromSeconds(5));
+                                TimeSpan.FromSeconds(2),
+                                TimeSpan.FromSeconds(5),
+                                TimeSpan.FromSeconds(15));
 
                             r.Ignore<ArgumentException>();
                             r.Ignore<NotFoundException>();
                             r.Ignore<ValidationException>();
+                            r.Ignore<NotSupportedException>();
+                            r.Ignore<PermanentIngestionException>();
+
                         });
 
                         if (hostKind == MassTransitHostKind.Worker)
@@ -84,5 +90,9 @@ namespace Vention.Infrastructure.Messaging
 
             return services;
         }
+
     }
+
 }
+
+

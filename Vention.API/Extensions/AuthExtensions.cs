@@ -1,6 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
+
 using Vention.Application;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Options;
 using Vention.Presentation.Common.Services;
 

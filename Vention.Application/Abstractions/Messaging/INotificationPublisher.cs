@@ -1,7 +1,6 @@
 ﻿using Vention.Application.Chats.Contracts;
-using Vention.Domain.Organizations;
 
-namespace Vention.Application.Abstractions
+namespace Vention.Application.Abstractions.Messaging
 {
 
     public interface INotificationPublisher

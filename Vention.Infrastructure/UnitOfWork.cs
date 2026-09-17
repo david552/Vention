@@ -76,5 +76,10 @@ namespace Vention.Infrastructure
             _currentTransaction?.Dispose();
             _currentTransaction = null;
         }
+
+        public void ClearChangeTracker()
+        {
+            _context.ChangeTracker.Clear();
+        }
     }
 }

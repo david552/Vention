@@ -11,9 +11,11 @@
       - INSTANCE_NAME=api-1
       - SignalR__Redis__ChannelPrefix=vention-chat
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
-      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=${POSTGRES_DB};Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Port=${RABBITMQ_PORT}
+      - RabbitMqSettings__VirtualHost=${RABBITMQ_VHOST}
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
       - Jwt__Secret=${JWT_SECRET}
@@ -24,6 +26,19 @@
       - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
       - Gateway__UserIdHeaderName=X-User-Id
       - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__EmbeddingModel=${OLLAMA_EMBEDDING_MODEL}
+      - Ollama__ChatModel=${OLLAMA_CHAT_MODEL}
+      - Ollama__TimeoutSeconds=${OLLAMA_TIMEOUT_SECONDS}
+      - Ollama__MaxConcurrentRequests=${OLLAMA_MAX_CONCURRENT_REQUESTS}
+      - Ollama__EmbeddingDimensions=${OLLAMA_EMBEDDING_DIMENSIONS}
+      - Rag__TopK=${RAG_TOP_K}
+      - Rag__ChunkSize=${RAG_CHUNK_SIZE}
+      - Rag__ChunkOverlap=${RAG_CHUNK_OVERLAP}
+      - Rag__EmbeddingBatchSize=${RAG_EMBEDDING_BATCH_SIZE}
+      - Rag__MaxCosineDistance=${RAG_MAX_COSINE_DISTANCE}
+      - Rag__MaxContextChars=${RAG_MAX_CONTEXT_CHARS}
+      - Rag__SourceSnippetChars=${RAG_SOURCE_SNIPPET_CHARS}
     volumes:
       - file-storage-data:/app/Storage
     networks:
@@ -48,9 +63,11 @@
       - INSTANCE_NAME=api-2
       - SignalR__Redis__ChannelPrefix=vention-chat
       - CryptoSettings__PasswordPepper=${PASSWORD_PEPPER}
-      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=${POSTGRES_DB};Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Port=${RABBITMQ_PORT}
+      - RabbitMqSettings__VirtualHost=${RABBITMQ_VHOST}
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
       - Jwt__Secret=${JWT_SECRET}
@@ -61,6 +78,19 @@
       - Gateway__SharedSecret=${GATEWAY_SHARED_SECRET}
       - Gateway__UserIdHeaderName=X-User-Id
       - Gateway__GatewaySecretHeaderName=X-Gateway-Secret
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__EmbeddingModel=${OLLAMA_EMBEDDING_MODEL}
+      - Ollama__ChatModel=${OLLAMA_CHAT_MODEL}
+      - Ollama__TimeoutSeconds=${OLLAMA_TIMEOUT_SECONDS}
+      - Ollama__MaxConcurrentRequests=${OLLAMA_MAX_CONCURRENT_REQUESTS}
+      - Ollama__EmbeddingDimensions=${OLLAMA_EMBEDDING_DIMENSIONS}
+      - Rag__TopK=${RAG_TOP_K}
+      - Rag__ChunkSize=${RAG_CHUNK_SIZE}
+      - Rag__ChunkOverlap=${RAG_CHUNK_OVERLAP}
+      - Rag__EmbeddingBatchSize=${RAG_EMBEDDING_BATCH_SIZE}
+      - Rag__MaxCosineDistance=${RAG_MAX_COSINE_DISTANCE}
+      - Rag__MaxContextChars=${RAG_MAX_CONTEXT_CHARS}
+      - Rag__SourceSnippetChars=${RAG_SOURCE_SNIPPET_CHARS}
     volumes:
       - file-storage-data:/app/Storage
     networks:
@@ -100,12 +130,27 @@
     environment:
       - DOTNET_ENVIRONMENT=Development
       - INSTANCE_NAME=processor-1
-      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=${POSTGRES_DB};Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Port=${RABBITMQ_PORT}
+      - RabbitMqSettings__VirtualHost=${RABBITMQ_VHOST}
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
       - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__EmbeddingModel=${OLLAMA_EMBEDDING_MODEL}
+      - Ollama__ChatModel=${OLLAMA_CHAT_MODEL}
+      - Ollama__TimeoutSeconds=${OLLAMA_TIMEOUT_SECONDS}
+      - Ollama__MaxConcurrentRequests=${OLLAMA_MAX_CONCURRENT_REQUESTS}
+      - Ollama__EmbeddingDimensions=${OLLAMA_EMBEDDING_DIMENSIONS}
+      - Rag__TopK=${RAG_TOP_K}
+      - Rag__ChunkSize=${RAG_CHUNK_SIZE}
+      - Rag__ChunkOverlap=${RAG_CHUNK_OVERLAP}
+      - Rag__EmbeddingBatchSize=${RAG_EMBEDDING_BATCH_SIZE}
+      - Rag__MaxCosineDistance=${RAG_MAX_COSINE_DISTANCE}
+      - Rag__MaxContextChars=${RAG_MAX_CONTEXT_CHARS}
+      - Rag__SourceSnippetChars=${RAG_SOURCE_SNIPPET_CHARS}
     volumes:
       - file-storage-data:/app/Storage
     networks:
@@ -129,12 +174,27 @@
     environment:
       - DOTNET_ENVIRONMENT=Development
       - INSTANCE_NAME=processor-2
-      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=VentionDb;Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
+      - ConnectionStrings__PostgresConnection=Host=vention-postgres;Database=${POSTGRES_DB};Username=${POSTGRES_SECRET_USER};Password=${POSTGRES_SECRET_PASSWORD}
       - ConnectionStrings__Redis=vention-redis:6379
       - RabbitMqSettings__Host=vention-rabbitmq
+      - RabbitMqSettings__Port=${RABBITMQ_PORT}
+      - RabbitMqSettings__VirtualHost=${RABBITMQ_VHOST}
       - RabbitMqSettings__Username=${RABBIT_SECRET_USER}
       - RabbitMqSettings__Password=${RABBIT_SECRET_PASS}
       - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__EmbeddingModel=${OLLAMA_EMBEDDING_MODEL}
+      - Ollama__ChatModel=${OLLAMA_CHAT_MODEL}
+      - Ollama__TimeoutSeconds=${OLLAMA_TIMEOUT_SECONDS}
+      - Ollama__MaxConcurrentRequests=${OLLAMA_MAX_CONCURRENT_REQUESTS}
+      - Ollama__EmbeddingDimensions=${OLLAMA_EMBEDDING_DIMENSIONS}
+      - Rag__TopK=${RAG_TOP_K}
+      - Rag__ChunkSize=${RAG_CHUNK_SIZE}
+      - Rag__ChunkOverlap=${RAG_CHUNK_OVERLAP}
+      - Rag__EmbeddingBatchSize=${RAG_EMBEDDING_BATCH_SIZE}
+      - Rag__MaxCosineDistance=${RAG_MAX_COSINE_DISTANCE}
+      - Rag__MaxContextChars=${RAG_MAX_CONTEXT_CHARS}
+      - Rag__SourceSnippetChars=${RAG_SOURCE_SNIPPET_CHARS}
     volumes:
       - file-storage-data:/app/Storage
     networks:
@@ -188,14 +248,13 @@
     depends_on:
       - api-gateway
 
-  
   vention-postgres:
     container_name: vention-postgres
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       - POSTGRES_USER=${POSTGRES_SECRET_USER}
       - POSTGRES_PASSWORD=${POSTGRES_SECRET_PASSWORD}
-      - POSTGRES_DB=VentionDb
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -203,7 +262,7 @@
     networks:
       - vention-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SECRET_USER} -d VentionDb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SECRET_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -248,7 +307,7 @@
     ports:
       - "9090:9090"
     environment:
-      - TZ=Asia/Tbilisi    
+      - TZ=${TIMEZONE}
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -279,7 +338,7 @@
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=
-      - TZ=Asia/Tbilisi
+      - TZ=${TIMEZONE}
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -288,7 +347,42 @@
     depends_on:
       - prometheus
     restart: unless-stopped
-  
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: vention-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - vention-network
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: vention-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        export OLLAMA_HOST=http://ollama:11434
+        echo "Pulling embedding model..."
+        ollama pull ${OLLAMA_EMBEDDING_MODEL}
+        echo "Pulling chat model..."
+        ollama pull ${OLLAMA_CHAT_MODEL}
+        echo "Ollama models ready."
+    networks:
+      - vention-network
+    restart: "no"
 
 volumes:
   postgres-data:
@@ -297,6 +391,7 @@ volumes:
   file-storage-data:
   prometheus-data:
   grafana-data:  
+  ollama-data:
 
 networks:
   vention-network:

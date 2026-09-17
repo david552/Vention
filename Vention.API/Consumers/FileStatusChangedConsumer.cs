@@ -1,5 +1,5 @@
 ﻿using MassTransit;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Files.IntegrationEvents;
 using Vention.Domain.Files;
 

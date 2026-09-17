@@ -3,7 +3,7 @@ using StackExchange.Redis;
 using Vention.API.Hubs;
 using Vention.API.Providers;
 using Vention.API.Services;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Options;
 
 namespace Vention.API.Extensions

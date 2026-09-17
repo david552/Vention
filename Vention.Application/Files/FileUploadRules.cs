@@ -12,7 +12,6 @@
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["application/pdf"] = ".pdf",
-                ["application/msword"] = ".doc",
                 ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] = ".docx",
                 ["text/plain"] = ".txt"
             };

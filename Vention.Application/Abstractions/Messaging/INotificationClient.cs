@@ -1,6 +1,6 @@
 ﻿using Vention.Application.Chats.Contracts;
 
-namespace Vention.Application.Abstractions
+namespace Vention.Application.Abstractions.Messaging
 {
 
     public interface INotificationClient

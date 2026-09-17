@@ -1,4 +1,5 @@
 ﻿using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Files;
 using Vention.Application.Exceptions;
 using Vention.Application.Messaging;
 using Vention.Domain.Files;

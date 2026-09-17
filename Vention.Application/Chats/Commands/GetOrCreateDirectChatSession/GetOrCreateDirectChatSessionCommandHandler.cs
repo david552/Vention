@@ -8,6 +8,7 @@ using Vention.Domain.Membership;
 using Vention.Domain.Organizations;
 using Vention.Domain.Users;
 using System.Data;
+using Vention.Application.Abstractions.Messaging;
 
 namespace Vention.Application.Chats.Commands.GetOrCreateDirectChatSession
 {
