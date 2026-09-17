@@ -28,6 +28,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics => metrics
         .AddRuntimeInstrumentation()
         .AddPrometheusHttpListener(options => options.UriPrefixes = new[] { "http://localhost:9464/" }));
+        .AddPrometheusHttpListener(options => options.UriPrefixes = new[] { "http://+:9464/" }));
 
 builder.Services.AddOptions<RabbitMqSettingsOptions>()
     .Bind(builder.Configuration.GetSection(RabbitMqSettingsOptions.SectionName))
