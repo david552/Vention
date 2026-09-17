@@ -1,4 +1,4 @@
-﻿namespace Vention.Application.Abstractions
+﻿namespace Vention.Application.Abstractions.Messaging
 {
     public interface IIntegrationEventPublisher
     {

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
+
 using System.Security.Cryptography;
-using Vention.Application.Abstractions;
+
+using Vention.Application.Abstractions.Files;
 using Vention.Application.Exceptions;
 using Vention.Application.Options;
 
@@ -131,6 +133,30 @@ namespace Vention.Infrastructure
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
+            }
+        }
+        public Task<Stream> GetStreamAsync(string storageKey, CancellationToken ct = default)
+        {
+            try
+            {
+                var fullPath = ResolveSafePath(storageKey);
+
+                if (!File.Exists(fullPath))
+                    throw new FileNotFoundException($"Stored file '{storageKey}' was not found.", fullPath);
+
+                Stream stream = new FileStream(
+                    fullPath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    bufferSize: CopyBufferSize,
+                    useAsync: true);
+
+                return Task.FromResult(stream);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+            {
+                throw new FileStorageException($"The stored file '{storageKey}' could not be opened.", ex);
             }
         }
     }

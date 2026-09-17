@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-
 using Vention.API.Authorization;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Common;
 using Vention.Application.Messages.Commands.SendChatMessage;
 using Vention.Application.Messages.Contracts;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Vention.API.Authorization;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Membership.Commands.ChangeMembershipRole;
 using Vention.Application.Membership.Commands.CreateMembership;
 using Vention.Application.Membership.Commands.DeleteMembership;

@@ -1,5 +1,6 @@
 ﻿using MassTransit;
-using Vention.Application.Abstractions;
+
+using Vention.Application.Abstractions.Messaging;
 
 namespace Vention.Infrastructure.Messaging
 {

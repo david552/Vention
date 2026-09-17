@@ -27,7 +27,6 @@ namespace Vention.Processor.Consumers
             var message = context.Message;
             var ct = context.CancellationToken;
 
-            await Task.Delay(5000);
             _logger.LogInformation(
                 "Ingestion complete started. FileId={FileId}",
                 message.FileId);
@@ -59,8 +58,6 @@ namespace Vention.Processor.Consumers
                 ct);
 
             await _unitOfWork.SaveChangesAsync(ct);
-
-
 
             _logger.LogInformation(
                 "Ingestion complete finished. FileId={FileId}, Status=Processed",

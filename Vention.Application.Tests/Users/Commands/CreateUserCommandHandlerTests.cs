@@ -1,6 +1,6 @@
 ﻿using Moq;
-
 using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Exceptions;
 using Vention.Application.Tests.Users.Common;
 using Vention.Application.Users.Commands.CreateUser;

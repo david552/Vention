@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using Vention.Application.Abstractions;
+
+using Vention.Application.Abstractions.Auth;
 using Vention.Application.Options;
 
 namespace Vention.Infrastructure

@@ -1,6 +1,9 @@
 ﻿using MassTransit;
+
 using Microsoft.EntityFrameworkCore;
+
 using Vention.Domain.Chats;
+using Vention.Domain.DocumentChunks;
 using Vention.Domain.Files;
 using Vention.Domain.Membership;
 using Vention.Domain.Messages;
@@ -20,9 +23,13 @@ namespace Vention.Infrastructure.Persistence
         public DbSet<ChatSessionMember> ChatSessionMembers => Set<ChatSessionMember>();
         public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
         public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
+        public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("vector");
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(VentionDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
 

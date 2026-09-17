@@ -1,5 +1,7 @@
 ﻿using Mapster;
 using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Files;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Common;
 using Vention.Application.Files.Contracts;
 using Vention.Application.Files.IntegrationEvents;

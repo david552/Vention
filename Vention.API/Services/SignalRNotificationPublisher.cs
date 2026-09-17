@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+
 using Vention.API.Hubs;
-using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Chats.Contracts;
 
 namespace Vention.API.Services

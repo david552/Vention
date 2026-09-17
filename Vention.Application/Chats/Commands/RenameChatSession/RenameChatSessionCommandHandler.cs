@@ -1,4 +1,5 @@
 ﻿using Vention.Application.Abstractions;
+using Vention.Application.Abstractions.Messaging;
 using Vention.Application.Authorization;
 using Vention.Application.Chats.Contracts;
 using Vention.Application.Chats.Services;

@@ -9,6 +9,7 @@ namespace Vention.Application.Abstractions
         Task CommitTransactionAsync(CancellationToken ct = default);
         Task RollbackTransactionAsync(CancellationToken ct = default);
 
-     
+        void ClearChangeTracker();
+
     }
 }

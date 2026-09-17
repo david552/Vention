@@ -1,6 +1,6 @@
 ﻿using Vention.Domain.Users;
 
-namespace Vention.Application.Abstractions
+namespace Vention.Application.Abstractions.Auth
 {
     public interface IJwtTokenGenerator
     {
